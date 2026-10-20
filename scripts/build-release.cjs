@@ -12,6 +12,6 @@ const assets=names.map(name=>{
 });
 fs.writeFileSync(path.join(root,'version.json'),JSON.stringify({
   version,
-  notes:['承認済みの拡大した貯金びんアイコンに更新しました。'],
+  notes:['Android用アイコンの追加余白を除き、承認済み画像と同じ大きさに修正しました。'],
   assets
 },null,2)+'\n');

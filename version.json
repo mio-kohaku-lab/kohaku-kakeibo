@@ -1,23 +1,23 @@
 {
-  "version": "0.3.15",
+  "version": "0.3.16",
   "notes": [
-    "承認済みの拡大した貯金びんアイコンに更新しました。"
+    "Android用アイコンの追加余白を除き、承認済み画像と同じ大きさに修正しました。"
   ],
   "assets": [
     {
-      "path": "releases/0.3.15/app.js",
+      "path": "releases/0.3.16/app.js",
       "sha256": "66342eea42b958732adcfc0fdae9331c2ed81643673d634b6c9cfacc60665045"
     },
     {
-      "path": "releases/0.3.15/core.js",
+      "path": "releases/0.3.16/core.js",
       "sha256": "2191768626670d1f325ee5cd9f0d53ea76022b6494d7da1ab078a7e2378db3a5"
     },
     {
-      "path": "releases/0.3.15/style.css",
+      "path": "releases/0.3.16/style.css",
       "sha256": "dc759be87ad7765acba9fc568f98cb11e4ff55058fc17e7196cb99b88d8d6a4a"
     },
     {
-      "path": "releases/0.3.15/update.js",
+      "path": "releases/0.3.16/update.js",
       "sha256": "1d0dc77602ebcff63f7af96dd45be0ae61642e061973ca4b0a38c6a6d0a7d226"
     }
   ]

@@ -1,6 +1,6 @@
 {
   "name": "kohaku-kakeibo",
-  "version": "0.3.15",
+  "version": "0.3.16",
   "private": true,
   "description": "コハクと家計簿 — 小さな支出記録アプリ",
   "scripts": {
