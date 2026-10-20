@@ -12,6 +12,6 @@ const assets=names.map(name=>{
 });
 fs.writeFileSync(path.join(root,'version.json'),JSON.stringify({
   version,
-  notes:['テンキーの高さを抑え、下に余白を残しました。','小分類がない分類を選んでも、分類一覧を表示したままにしました。'],
+  notes:['小分類を選んだ後も選択状態を表示したままにしました。','その他に病院・交通費・車関係・その他を追加しました。'],
   assets
 },null,2)+'\n');

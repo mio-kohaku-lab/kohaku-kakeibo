@@ -34,7 +34,7 @@ test('分類のキャンセルは元の内訳を保持し、確定後の保存�
   assert.equal($('chosenCategory').textContent,'🖼️ QOL ／ 外食');
   $('chooseCategory').onclick();$('categories').children[1].onclick();$('children').children[2].onclick();
   assert.equal($('chosenCategory').textContent,'💡 光熱費 ／ 水道代');
-  assert.equal($('categoryPanel').hidden,true);
+  assert.equal($('categoryPanel').hidden,false);assert.equal($('children').children[2].attrs['aria-pressed'],true);
   $('entryForm').onsubmit({preventDefault(){},submitter:{id:'save'}});
   const rows=JSON.parse(f.storage.get('kohaku-ledger-v1'));
   assert.equal(rows.length,1);assert.equal(rows[0].id,'old');assert.equal(rows[0].amount,1200);assert.equal(rows[0].subcategory,'水道代');assert.equal(rows[0].memo,f.old.memo);
@@ -82,4 +82,16 @@ test('ゼロ円を保存せず、編集・連続入力後にも専用パネル�
  $('entryForm').onsubmit({preventDefault(){}});assert.equal(JSON.parse(f.storage.get('kohaku-ledger-v1')).length,1);assert.match($('formError').textContent,/金額/);
  vm.runInContext("amountKey('5')",f.context);$('entryForm').onsubmit({preventDefault(){},submitter:{id:'continue'}});
  assert.equal($('chosenAmount').textContent,'¥ 0');assert.equal($('amountPanel').hidden,false);
+});
+test('その他の4つの小分類を選択・保存でき、一覧を開いたまま切り替えられる',()=>{
+ const f=fixture(),$=f.$;$('add').onclick();$('amount').value='500';$('chooseCategory').onclick();$('categories').children[5].onclick();
+ assert.deepEqual($('children').children.map(b=>b.textContent),['病院','交通費','車関係','その他']);
+ for(let i=0;i<4;i++){$('children').children[i].onclick();assert.equal($('categoryPanel').hidden,false);assert.equal($('children').children[i].attrs['aria-pressed'],true);assert.equal($('children').children.filter(b=>b.attrs['aria-pressed']).length,1);}
+ $('entryForm').onsubmit({preventDefault(){},submitter:{id:'save'}});
+ const rows=JSON.parse(f.storage.get('kohaku-ledger-v1'));assert.equal(rows[1].category,'その他');assert.equal(rows[1].subcategory,'その他');
+});
+test('以前の小分類なしのその他は編集してもそのまま保存できる',()=>{
+ const f=fixture(),$=f.$;vm.runInContext("rows[0].category='その他';rows[0].subcategory='';openEditor(rows[0])",f.context);
+ $('amount').value='1500';$('entryForm').onsubmit({preventDefault(){},submitter:{id:'save'}});
+ const rows=JSON.parse(f.storage.get('kohaku-ledger-v1'));assert.equal(rows[0].amount,1500);assert.equal(rows[0].subcategory,'');assert.equal(rows[0].category,'その他');
 });
