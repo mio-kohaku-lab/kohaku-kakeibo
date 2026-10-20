@@ -9,3 +9,5 @@
 #categoryPanel #categories button,#categoryPanel #children button{height:100%;min-height:0;min-width:0;padding:0 10px;font-size:14px;line-height:1.2;overflow-wrap:anywhere}
 #categoryPanel .picker-help{display:none}
 @media(max-height:550px){#editor .editor-top{padding-inline:14px}#editor .field-row,#editor #chooseCategory{height:40px}#inputDock .picker-head{height:36px}#categoryPanel #categories button,#categoryPanel #children button{font-size:12px}#editor .editor-bottom{padding-bottom:4px}}
+/* v0.3.2: compact keypad; spare room stays below the keys */
+#amountPanel #keypad{height:min(224px,100%);min-height:176px;grid-template-rows:repeat(4,minmax(44px,1fr))}

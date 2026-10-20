@@ -1,25 +1,24 @@
 {
-  "version": "0.3.1",
+  "version": "0.3.2",
   "notes": [
-    "メモ入力欄を削除しました。",
-    "分類を6行とも画面内に収める配置にしました。",
-    "更新ページをバージョンと更新操作中心に簡素化しました。"
+    "テンキーの高さを抑え、下に余白を残しました。",
+    "小分類がない分類を選んでも、分類一覧を表示したままにしました。"
   ],
   "assets": [
     {
-      "path": "releases/0.3.1/app.js",
-      "sha256": "bfe4261789deb9e42d3bbd4684469077dbfd20874ad8470a1c015a30e6e39b18"
+      "path": "releases/0.3.2/app.js",
+      "sha256": "52ad2b1ad31097921a7722e25791f2b83c5732a70dcafacb372c44b882fff84e"
     },
     {
-      "path": "releases/0.3.1/core.js",
+      "path": "releases/0.3.2/core.js",
       "sha256": "89ed2231b604d9527d45e13ecb84c0b1ef834e6eeecf5e9dd2bfe2ea60ada934"
     },
     {
-      "path": "releases/0.3.1/style.css",
-      "sha256": "7b5e0f3c11113261ad9c1295dc89d10a9e0536fd708923dded2a5ff16dda3f9c"
+      "path": "releases/0.3.2/style.css",
+      "sha256": "2775e53219a44f982ba3e9803ad11ed4252961534f616d54074b4ca34156a6eb"
     },
     {
-      "path": "releases/0.3.1/update.js",
+      "path": "releases/0.3.2/update.js",
       "sha256": "1d0dc77602ebcff63f7af96dd45be0ae61642e061973ca4b0a38c6a6d0a7d226"
     }
   ]

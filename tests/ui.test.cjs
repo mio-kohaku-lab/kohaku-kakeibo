@@ -42,8 +42,12 @@ test('分類のキャンセルは元の内訳を保持し、確定後の保存�
 test('小分類なしの大分類は即確定し、連続入力で保存データを失わない',()=>{
   const f=fixture(),$=f.$;
   $('add').onclick();$('amount').value='650';
-  $('chooseCategory').onclick();$('categories').children[0].onclick();
-  assert.equal($('categoryPanel').hidden,true);
+  $('chooseCategory').onclick();$('categories').children[1].onclick();$('categories').children[0].onclick();
+  assert.equal($('categoryPanel').hidden,false);
+  assert.equal($('idlePanel').hidden,true);
+  assert.equal($('children').children.length,0);
+  assert.equal($('categories').children[0].attrs['aria-pressed'],true);
+  assert.equal($('chosenCategory').textContent,'🍜 食費');
   $('entryForm').onsubmit({preventDefault(){},submitter:{id:'continue'}});
   assert.equal($('editor').open,true);assert.equal($('amount').value,'');
   const rows=JSON.parse(f.storage.get('kohaku-ledger-v1'));

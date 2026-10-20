@@ -12,6 +12,6 @@ const assets=names.map(name=>{
 });
 fs.writeFileSync(path.join(root,'version.json'),JSON.stringify({
   version,
-  notes:['メモ入力欄を削除しました。','分類を6行とも画面内に収める配置にしました。','更新ページをバージョンと更新操作中心に簡素化しました。'],
+  notes:['テンキーの高さを抑え、下に余白を残しました。','小分類がない分類を選んでも、分類一覧を表示したままにしました。'],
   assets
 },null,2)+'\n');

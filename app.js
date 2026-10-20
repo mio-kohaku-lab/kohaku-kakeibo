@@ -20,8 +20,11 @@ function categoryLabel(){
   $('chosenCategory').textContent=c.icon+' '+c.name+(sub?' ／ '+sub:'');
 }
 function commitCategory(category,child=''){
-  selected=category;sub=child;categoryLabel();setPanel('idle');
-  $('chooseCategory').focus();
+  selected=category;sub=child;categoryLabel();
+  if(!categories.find(c=>c.name===category).children.length){
+    setPanel('category');
+    $('categories').querySelectorAll('button')[categories.findIndex(c=>c.name===category)].focus();
+  }else{setPanel('idle');$('chooseCategory').focus();}
 }
 function renderCategories(){
   $('categories').replaceChildren();
