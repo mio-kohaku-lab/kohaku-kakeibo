@@ -1,24 +1,23 @@
 {
-  "version": "0.3.6",
+  "version": "0.3.7",
   "notes": [
-    "タイトル・月選択・支出欄・タブの間隔を詰めました。",
-    "円グラフの上下の余白を注釈に合わせて縮めました。"
+    "月の統計を項目別合計と円グラフの2つのタブに分けました。"
   ],
   "assets": [
     {
-      "path": "releases/0.3.6/app.js",
-      "sha256": "96220b741a7394382c750067248d1eeb24ba73ae91cdae0ba9c11c204ccbe2ba"
+      "path": "releases/0.3.7/app.js",
+      "sha256": "5d0f5b456b00050e658fd42bc33c126903d7b9b85a9f62f26e8e8542af283ed1"
     },
     {
-      "path": "releases/0.3.6/core.js",
+      "path": "releases/0.3.7/core.js",
       "sha256": "d962489a62e495c8f90cd4e6894578f603ecb7cce133fe7dd91e9f7c5948f85a"
     },
     {
-      "path": "releases/0.3.6/style.css",
-      "sha256": "3da74c422944856e81b17b99df45fdb3e6700c3545b48606ea414692be764229"
+      "path": "releases/0.3.7/style.css",
+      "sha256": "fcd85232d2380d6db2212940e8647e2b51f4c074ecb4533d40de2f55792f3054"
     },
     {
-      "path": "releases/0.3.6/update.js",
+      "path": "releases/0.3.7/update.js",
       "sha256": "1d0dc77602ebcff63f7af96dd45be0ae61642e061973ca4b0a38c6a6d0a7d226"
     }
   ]

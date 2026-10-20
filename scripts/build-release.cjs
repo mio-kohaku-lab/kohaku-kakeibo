@@ -12,6 +12,6 @@ const assets=names.map(name=>{
 });
 fs.writeFileSync(path.join(root,'version.json'),JSON.stringify({
   version,
-  notes:['タイトル・月選択・支出欄・タブの間隔を詰めました。','円グラフの上下の余白を注釈に合わせて縮めました。'],
+  notes:['月の統計を項目別合計と円グラフの2つのタブに分けました。'],
   assets
 },null,2)+'\n');

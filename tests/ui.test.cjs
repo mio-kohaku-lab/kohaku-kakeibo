@@ -104,11 +104,21 @@ test('記録一覧は新しい日付順の1行表示で、同日は追加の新�
 });
 test('円グラフは6分類の名前・割合・引き出し線を表示し、単一分類も描画できる',()=>{
  const f=fixture(),$=f.$;
- vm.runInContext("rows=categories.map((c,i)=>({id:String(i),date:'2026-10-20',amount:i?1:95,category:c.name,subcategory:'',memo:''}));month='2026-10';view='stats';render()",f.context);
+ vm.runInContext("rows=categories.map((c,i)=>({id:String(i),date:'2026-10-20',amount:i?1:95,category:c.name,subcategory:'',memo:''}));month='2026-10';view='stats';statsView='chart';render()",f.context);
  let chart=$('content').children[0].children[0];
  assert.equal(chart.children.filter(n=>n.tag==='polyline').length,6);
  const names=chart.children.filter(n=>n.attrs.class==='chart-label');assert.equal(names.length,6);
  for(const side of ['start','end']){const ys=names.filter(n=>n.attrs['text-anchor']===side).map(n=>Number(n.attrs.y)).sort((a,b)=>a-b);for(let i=1;i<ys.length;i++)assert.ok(ys[i]-ys[i-1]>=43);}
  assert.ok(chart.children.some(n=>n.textContent==='95.0%'));
  vm.runInContext("rows=rows.slice(0,1);render()",f.context);chart=$('content').children[0].children[0];assert.equal(chart.children.filter(n=>n.tag==='circle').length,1);assert.ok(chart.children.some(n=>n.textContent==='100.0%'));
+});
+test('統計の合計とグラフを別表示にし、月移動と空の月でも選択を維持する',()=>{
+ const f=fixture(),$=f.$;vm.runInContext("month='2026-10';render()",f.context);
+ assert.equal($('statsSwitch').hidden,true);$('statsTab').onclick();assert.equal($('statsSwitch').hidden,false);
+ assert.equal($('totalsTab').attrs['aria-pressed'],true);assert.equal($('content').children[0].tag,'details');
+ $('chartTab').onclick();assert.equal($('content').children.length,1);assert.equal($('content').children[0].className,'annotated-chart');assert.equal($('total').textContent,'¥ 1,200');
+ $('prev').onclick();assert.equal($('chartTab').attrs['aria-pressed'],true);assert.equal($('content').children[0].className,'empty');
+ $('next').onclick();assert.equal($('content').children[0].className,'annotated-chart');
+ $('totalsTab').onclick();assert.equal($('content').children[0].tag,'details');assert.equal($('total').textContent,'¥ 1,200');
+ $('listTab').onclick();assert.equal($('statsSwitch').hidden,true);assert.equal($('content').children[0].tag,'button');
 });

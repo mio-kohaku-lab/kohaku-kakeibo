@@ -1,12 +1,12 @@
 const $=id=>document.getElementById(id), KEY='kohaku-ledger-v1', {categories,validate,monthly}=Ledger;
 const yen=n=>'¥ '+n.toLocaleString('ja-JP');
 const localDate=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
-let month=localDate().slice(0,7),view='list',rows=[],editing=null,selected='食費',sub='',storageFailed=false;
+let month=localDate().slice(0,7),view='list',statsView='totals',rows=[],editing=null,selected='食費',sub='',storageFailed=false;
 try{const raw=localStorage.getItem(KEY);rows=raw?validate(JSON.parse(raw)):[];}catch(e){storageFailed=true;}
 function el(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
 function toast(text){$('toast').textContent=text;$('toast').classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('toast').classList.remove('visible'),2600);}
 function persist(next){if(storageFailed)throw Error('保存データを読み込めませんでした。上書きを防ぐため保存を止めています。バックアップから復元してください。');localStorage.setItem(KEY,JSON.stringify(next));rows=next;}
-function render(){const data=monthly(rows,month);$('monthTitle').textContent=`${month.slice(0,4)}年 ${Number(month.slice(5))}月`;$('total').textContent=yen(data.total);$('count').textContent=`${data.entries.length}件`;$('listTab').setAttribute('aria-selected',view==='list');$('statsTab').setAttribute('aria-selected',view==='stats');const target=$('content');target.replaceChildren();
+function render(){const data=monthly(rows,month);$('monthTitle').textContent=`${month.slice(0,4)}年 ${Number(month.slice(5))}月`;$('total').textContent=yen(data.total);$('count').textContent=`${data.entries.length}件`;$('listTab').setAttribute('aria-selected',view==='list');$('statsTab').setAttribute('aria-selected',view==='stats');$('statsSwitch').hidden=view!=='stats';$('totalsTab').setAttribute('aria-pressed',statsView==='totals');$('chartTab').setAttribute('aria-pressed',statsView==='chart');const target=$('content');target.replaceChildren();
 if(storageFailed)target.append(el('p','保存データを読み込めません。バックアップから復元してください。','error'));
 if(!data.entries.length){const empty=el('div',undefined,'empty');empty.append(el('div','✎','empty-icon'),el('h3','この月の記録はまだありません'),el('p','最初のひとつを、気軽に記録してみよう。'));target.append(empty);return;}
 if(view==='list'){
@@ -19,7 +19,7 @@ if(view==='list'){
     b.onclick=()=>openEditor(r);target.append(b);
   }
 }
-else{target.append(spendingChart(data));for(const c of data.groups.filter(c=>c.total).sort((a,b)=>b.total-a.total)){const details=el('details',undefined,'stat-row'),summary=el('summary');const dot=el('span','●');dot.style.color=c.color;summary.append(dot,el('strong',`${c.icon} ${c.name}`),el('span',`${(c.total/data.total*100).toFixed(1)}%`,'percent'),el('strong',yen(c.total)));details.append(summary);const subs=[...new Set(data.entries.filter(r=>r.category===c.name).map(r=>r.subcategory))];for(const s of subs){const line=el('div',undefined,'sub-row');line.append(el('span',s||'内訳なし'),el('span',yen(data.entries.filter(r=>r.category===c.name&&r.subcategory===s).reduce((a,r)=>a+r.amount,0))));details.append(line);}target.append(details);}}}
+else{if(statsView==='chart'){target.append(spendingChart(data));return;}for(const c of data.groups.filter(c=>c.total).sort((a,b)=>b.total-a.total)){const details=el('details',undefined,'stat-row'),summary=el('summary');const dot=el('span','●');dot.style.color=c.color;summary.append(dot,el('strong',`${c.icon} ${c.name}`),el('span',`${(c.total/data.total*100).toFixed(1)}%`,'percent'),el('strong',yen(c.total)));details.append(summary);const subs=[...new Set(data.entries.filter(r=>r.category===c.name).map(r=>r.subcategory))];for(const s of subs){const line=el('div',undefined,'sub-row');line.append(el('span',s||'内訳なし'),el('span',yen(data.entries.filter(r=>r.category===c.name&&r.subcategory===s).reduce((a,r)=>a+r.amount,0))));details.append(line);}target.append(details);}}}
 function spendingChart(data){
   const wrap=el('div',undefined,'annotated-chart');
   const svg=(tag,attrs,text)=>{const n=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n;};
@@ -53,6 +53,9 @@ function spendingChart(data){
 }
 function shift(n){const d=new Date(Number(month.slice(0,4)),Number(month.slice(5))-1+n,1);month=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;render();}
 $('prev').onclick=()=>shift(-1);$('next').onclick=()=>shift(1);$('today').onclick=()=>{month=localDate().slice(0,7);render();};$('listTab').onclick=()=>{view='list';render();};$('statsTab').onclick=()=>{view='stats';render();};
+
+$('totalsTab').onclick=()=>{statsView='totals';render();};
+$('chartTab').onclick=()=>{statsView='chart';render();};
 
 let browsingCategory = selected;
 function categoryLabel(){
