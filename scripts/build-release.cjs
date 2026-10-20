@@ -12,6 +12,6 @@ const assets=names.map(name=>{
 });
 fs.writeFileSync(path.join(root,'version.json'),JSON.stringify({
   version,
-  notes:['Android用アイコンの追加余白を除き、承認済み画像と同じ大きさに修正しました。'],
+  notes:['実機表示に合わせ、Android用アイコンを86%に調整しました。'],
   assets
 },null,2)+'\n');
