@@ -1,25 +1,24 @@
 {
-  "version": "0.3.5",
+  "version": "0.3.6",
   "notes": [
-    "新しい記録を上に並べるようにしました。",
-    "円グラフの周囲に分類名と割合を追加しました。",
-    "支出欄を小さくし、キャッチコピーを削除しました。"
+    "タイトル・月選択・支出欄・タブの間隔を詰めました。",
+    "円グラフの上下の余白を注釈に合わせて縮めました。"
   ],
   "assets": [
     {
-      "path": "releases/0.3.5/app.js",
-      "sha256": "b8bb08619e164b3bea485f8c174eeb7a8732fff04178d828dda060af19d26cde"
+      "path": "releases/0.3.6/app.js",
+      "sha256": "96220b741a7394382c750067248d1eeb24ba73ae91cdae0ba9c11c204ccbe2ba"
     },
     {
-      "path": "releases/0.3.5/core.js",
+      "path": "releases/0.3.6/core.js",
       "sha256": "d962489a62e495c8f90cd4e6894578f603ecb7cce133fe7dd91e9f7c5948f85a"
     },
     {
-      "path": "releases/0.3.5/style.css",
-      "sha256": "b273eb23bed177d7a686157d4147a198001207adb14595dc54f31893b10ba1f1"
+      "path": "releases/0.3.6/style.css",
+      "sha256": "3da74c422944856e81b17b99df45fdb3e6700c3545b48606ea414692be764229"
     },
     {
-      "path": "releases/0.3.5/update.js",
+      "path": "releases/0.3.6/update.js",
       "sha256": "1d0dc77602ebcff63f7af96dd45be0ae61642e061973ca4b0a38c6a6d0a7d226"
     }
   ]

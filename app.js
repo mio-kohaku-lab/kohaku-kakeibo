@@ -32,7 +32,7 @@ function spendingChart(data){
     const startPoint=point(angle),endPoint=point(end);
     const shape=groups.length===1?svg('circle',{cx:200,cy:160,r:82,fill:c.color}):svg('path',{d:`M 200 160 L ${startPoint.join(' ')} A 82 82 0 ${sweep>Math.PI?1:0} 1 ${endPoint.join(' ')} Z`,fill:c.color,stroke:'#faf7f1','stroke-width':1.5});
     const percent=(c.total/data.total*100).toFixed(1)+'%';shape.append(svg('title',{},`${c.name} ${percent} ${yen(c.total)}`));chart.append(shape);
-    labels.push({c,percent,side:Math.cos(mid)>=0?1:-1,anchor:point(mid),elbow:point(mid,94),y:160+Math.sin(mid)*116});angle=end;
+    labels.push({c,percent,side:Math.cos(mid)>=0?1:-1,anchor:point(mid),elbow:point(mid,94),y:160+Math.sin(mid)*100});angle=end;
   }
   for(const side of [-1,1]){
     const items=labels.filter(l=>l.side===side).sort((a,b)=>a.y-b.y);
@@ -45,6 +45,10 @@ function spendingChart(data){
       chart.append(svg('text',{x,y:l.y+13,'text-anchor':side===1?'start':'end',class:'chart-percent'},l.percent));
     }
   }
+  // Fit the viewport to the pie, leader lines and labels, keeping a small gutter.
+  const top=Math.floor(Math.min(66,...labels.map(l=>l.y-24))-6);
+  const bottom=Math.ceil(Math.max(254,...labels.map(l=>l.y+18))+6);
+  chart.setAttribute('viewBox',`0 ${top} 400 ${bottom-top}`);
   wrap.append(chart);return wrap;
 }
 function shift(n){const d=new Date(Number(month.slice(0,4)),Number(month.slice(5))-1+n,1);month=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;render();}

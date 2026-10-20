@@ -20,3 +20,5 @@
 /* v0.3.5: shorter summary and directly annotated pie */
 .summary{padding:16px 24px}.summary p{margin:0 0 6px}.summary strong{font-size:34px;line-height:1.2}
 .annotated-chart{width:100%;padding:4px 0 12px}.annotated-chart svg{display:block;width:100%;height:auto;max-height:360px;overflow:visible}.chart-label{font:500 13px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;fill:#373b33}.chart-percent{font:13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#69705f}
+/* v0.3.6: tighter spacing between overview sections */
+.app>header{margin-bottom:10px}.app>.month{margin-bottom:8px}.app>.summary{margin-bottom:6px}.app>nav{margin-bottom:2px}.app>nav button{padding-top:10px;padding-bottom:10px;min-height:44px}.annotated-chart{padding:2px 0 4px}
