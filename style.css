@@ -17,3 +17,6 @@
 .compact-entry .entry-item{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
 .compact-entry .entry-amount{font-size:14px;font-weight:500;text-align:right;font-variant-numeric:tabular-nums}
 @media(max-width:350px){.entry.compact-entry{grid-template-columns:38px 22px minmax(0,1fr) auto;gap:4px;font-size:12px}.compact-entry .entry-amount{font-size:13px}}
+/* v0.3.5: shorter summary and directly annotated pie */
+.summary{padding:16px 24px}.summary p{margin:0 0 6px}.summary strong{font-size:34px;line-height:1.2}
+.annotated-chart{width:100%;padding:4px 0 12px}.annotated-chart svg{display:block;width:100%;height:auto;max-height:360px;overflow:visible}.chart-label{font:500 13px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;fill:#373b33}.chart-percent{font:13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#69705f}

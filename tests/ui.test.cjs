@@ -16,7 +16,7 @@ function fixture(){
     blur(){document.activeElement=null;}
     addEventListener(name,fn){this[name]=fn;}
   }
-  const document={getElementById(id){if(!elements.has(id))elements.set(id,new Element());return elements.get(id);},createElement(tag){return new Element(tag);}};
+  const document={getElementById(id){if(!elements.has(id))elements.set(id,new Element());return elements.get(id);},createElement(tag){return new Element(tag);},createElementNS(ns,tag){return new Element(tag);}};
   const old={id:'old',date:'2026-10-17',amount:1200,category:'QOL',subcategory:'外食',memo:'以前の記録'};
   const storage=new Map([['kohaku-ledger-v1',JSON.stringify([old])]]);
   const context=vm.createContext({document,Ledger:require('../core.js'),localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},window:{addEventListener:(k,v)=>handlers[k]=v},crypto:require('node:crypto').webcrypto,setTimeout:()=>0,clearTimeout(){},confirm:()=>true,console});
@@ -95,10 +95,20 @@ test('以前の小分類なしのその他は編集してもそのまま保存�
  $('amount').value='1500';$('entryForm').onsubmit({preventDefault(){},submitter:{id:'save'}});
  const rows=JSON.parse(f.storage.get('kohaku-ledger-v1'));assert.equal(rows[0].amount,1500);assert.equal(rows[0].subcategory,'');assert.equal(rows[0].category,'その他');
 });
-test('記録一覧は古い日付順の1行表示で、同日順と編集対象を保つ',()=>{
+test('記録一覧は新しい日付順の1行表示で、同日は追加の新しい順になる',()=>{
  const f=fixture(),$=f.$;
  vm.runInContext("rows=[{...rows[0],id:'late',date:'2026-10-20',category:'定期購入品',subcategory:'薬',amount:900},{...rows[0],id:'early',date:'2026-10-16',category:'食費',subcategory:'',amount:2480},{...rows[0],id:'same',date:'2026-10-16',amount:100}];month='2026-10';render()",f.context);
  const entries=$('content').children;assert.equal(entries.length,3);
- assert.deepEqual(entries.map(b=>b.children.map(c=>c.textContent)),[['10/16','(金)','食費','¥ 2,480'],['10/16','(金)','外食','¥ 100'],['10/20','(火)','薬','¥ 900']]);
- entries[2].onclick();assert.equal($('amount').value,'900');assert.equal($('chosenCategory').textContent,'💊 定期購入品 ／ 薬');
+ assert.deepEqual(entries.map(b=>b.children.map(c=>c.textContent)),[['10/20','(火)','薬','¥ 900'],['10/16','(金)','外食','¥ 100'],['10/16','(金)','食費','¥ 2,480']]);
+ entries[0].onclick();assert.equal($('amount').value,'900');assert.equal($('chosenCategory').textContent,'💊 定期購入品 ／ 薬');
+});
+test('円グラフは6分類の名前・割合・引き出し線を表示し、単一分類も描画できる',()=>{
+ const f=fixture(),$=f.$;
+ vm.runInContext("rows=categories.map((c,i)=>({id:String(i),date:'2026-10-20',amount:i?1:95,category:c.name,subcategory:'',memo:''}));month='2026-10';view='stats';render()",f.context);
+ let chart=$('content').children[0].children[0];
+ assert.equal(chart.children.filter(n=>n.tag==='polyline').length,6);
+ const names=chart.children.filter(n=>n.attrs.class==='chart-label');assert.equal(names.length,6);
+ for(const side of ['start','end']){const ys=names.filter(n=>n.attrs['text-anchor']===side).map(n=>Number(n.attrs.y)).sort((a,b)=>a-b);for(let i=1;i<ys.length;i++)assert.ok(ys[i]-ys[i-1]>=43);}
+ assert.ok(chart.children.some(n=>n.textContent==='95.0%'));
+ vm.runInContext("rows=rows.slice(0,1);render()",f.context);chart=$('content').children[0].children[0];assert.equal(chart.children.filter(n=>n.tag==='circle').length,1);assert.ok(chart.children.some(n=>n.textContent==='100.0%'));
 });

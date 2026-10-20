@@ -19,7 +19,34 @@ if(view==='list'){
     b.onclick=()=>openEditor(r);target.append(b);
   }
 }
-else{const chart=el('div',undefined,'chart-wrap'),ring=el('div',undefined,'donut');let start=0;const stops=data.groups.filter(c=>c.total).map(c=>{const end=start+c.total/data.total*100;const s=`${c.color} ${start}% ${end}%`;start=end;return s;});ring.style.background=`conic-gradient(${stops.join(',')})`;ring.setAttribute('role','img');ring.setAttribute('aria-label','カテゴリ別支出の割合。内訳は下の一覧に表示。');const center=el('div',undefined,'donut-center');center.append(el('small','支出の内訳'),el('strong',`${data.groups.filter(c=>c.total).length}カテゴリ`));ring.append(center);chart.append(ring);target.append(chart);for(const c of data.groups.filter(c=>c.total).sort((a,b)=>b.total-a.total)){const details=el('details',undefined,'stat-row'),summary=el('summary');const dot=el('span','●');dot.style.color=c.color;summary.append(dot,el('strong',`${c.icon} ${c.name}`),el('span',`${(c.total/data.total*100).toFixed(1)}%`,'percent'),el('strong',yen(c.total)));details.append(summary);const subs=[...new Set(data.entries.filter(r=>r.category===c.name).map(r=>r.subcategory))];for(const s of subs){const line=el('div',undefined,'sub-row');line.append(el('span',s||'内訳なし'),el('span',yen(data.entries.filter(r=>r.category===c.name&&r.subcategory===s).reduce((a,r)=>a+r.amount,0))));details.append(line);}target.append(details);}}}
+else{target.append(spendingChart(data));for(const c of data.groups.filter(c=>c.total).sort((a,b)=>b.total-a.total)){const details=el('details',undefined,'stat-row'),summary=el('summary');const dot=el('span','●');dot.style.color=c.color;summary.append(dot,el('strong',`${c.icon} ${c.name}`),el('span',`${(c.total/data.total*100).toFixed(1)}%`,'percent'),el('strong',yen(c.total)));details.append(summary);const subs=[...new Set(data.entries.filter(r=>r.category===c.name).map(r=>r.subcategory))];for(const s of subs){const line=el('div',undefined,'sub-row');line.append(el('span',s||'内訳なし'),el('span',yen(data.entries.filter(r=>r.category===c.name&&r.subcategory===s).reduce((a,r)=>a+r.amount,0))));details.append(line);}target.append(details);}}}
+function spendingChart(data){
+  const wrap=el('div',undefined,'annotated-chart');
+  const svg=(tag,attrs,text)=>{const n=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n;};
+  const chart=svg('svg',{viewBox:'0 0 400 320',role:'img','aria-label':'分類別の支出割合。分類名と割合を円の周囲に表示しています。'});
+  const groups=data.groups.filter(c=>c.total).sort((a,b)=>b.total-a.total),labels=[];
+  let angle=-Math.PI/2;
+  const point=(a,r=82)=>[200+Math.cos(a)*r,160+Math.sin(a)*r];
+  for(const c of groups){
+    const sweep=c.total/data.total*Math.PI*2,end=angle+sweep,mid=angle+sweep/2;
+    const startPoint=point(angle),endPoint=point(end);
+    const shape=groups.length===1?svg('circle',{cx:200,cy:160,r:82,fill:c.color}):svg('path',{d:`M 200 160 L ${startPoint.join(' ')} A 82 82 0 ${sweep>Math.PI?1:0} 1 ${endPoint.join(' ')} Z`,fill:c.color,stroke:'#faf7f1','stroke-width':1.5});
+    const percent=(c.total/data.total*100).toFixed(1)+'%';shape.append(svg('title',{},`${c.name} ${percent} ${yen(c.total)}`));chart.append(shape);
+    labels.push({c,percent,side:Math.cos(mid)>=0?1:-1,anchor:point(mid),elbow:point(mid,94),y:160+Math.sin(mid)*116});angle=end;
+  }
+  for(const side of [-1,1]){
+    const items=labels.filter(l=>l.side===side).sort((a,b)=>a.y-b.y);
+    for(let i=0;i<items.length;i++)items[i].y=Math.max(30,items[i].y,i?items[i-1].y+43:30);
+    if(items.length&&items.at(-1).y>278){items.at(-1).y=278;for(let i=items.length-2;i>=0;i--)items[i].y=Math.min(items[i].y,items[i+1].y-43);}
+    for(const l of items){
+      const x=side===1?298:102,edge=side===1?292:108;
+      chart.append(svg('polyline',{points:`${l.anchor.join(',')} ${l.elbow.join(',')} ${edge},${l.y}`,fill:'none',stroke:l.c.color,'stroke-width':1.5}));
+      chart.append(svg('text',{x,y:l.y-5,'text-anchor':side===1?'start':'end',class:'chart-label'},l.c.icon+' '+l.c.name));
+      chart.append(svg('text',{x,y:l.y+13,'text-anchor':side===1?'start':'end',class:'chart-percent'},l.percent));
+    }
+  }
+  wrap.append(chart);return wrap;
+}
 function shift(n){const d=new Date(Number(month.slice(0,4)),Number(month.slice(5))-1+n,1);month=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;render();}
 $('prev').onclick=()=>shift(-1);$('next').onclick=()=>shift(1);$('today').onclick=()=>{month=localDate().slice(0,7);render();};$('listTab').onclick=()=>{view='list';render();};$('statsTab').onclick=()=>{view='stats';render();};
 

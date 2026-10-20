@@ -12,6 +12,6 @@ const assets=names.map(name=>{
 });
 fs.writeFileSync(path.join(root,'version.json'),JSON.stringify({
   version,
-  notes:['記録一覧を古い日付順にしました。','日付・曜日・項目・金額をコンパクトな1行にまとめました。'],
+  notes:['新しい記録を上に並べるようにしました。','円グラフの周囲に分類名と割合を追加しました。','支出欄を小さくし、キャッチコピーを削除しました。'],
   assets
 },null,2)+'\n');
