@@ -1,24 +1,24 @@
 {
-  "version": "0.3.3",
+  "version": "0.3.4",
   "notes": [
-    "小分類を選んだ後も選択状態を表示したままにしました。",
-    "その他に病院・交通費・車関係・その他を追加しました。"
+    "記録一覧を古い日付順にしました。",
+    "日付・曜日・項目・金額をコンパクトな1行にまとめました。"
   ],
   "assets": [
     {
-      "path": "releases/0.3.3/app.js",
-      "sha256": "44a7ecf7acd29bd13a985320da04edf39b093001dcaa8692b5a086326e2a9fc8"
+      "path": "releases/0.3.4/app.js",
+      "sha256": "0230a71efbfc64c3a54771932ea16d100d177356be2dcc2b96dbefb0d4834f98"
     },
     {
-      "path": "releases/0.3.3/core.js",
-      "sha256": "2ca5d7f4ac9e880a9a4567602420a017fceb162a4c93773863b6917c65792254"
+      "path": "releases/0.3.4/core.js",
+      "sha256": "0513e1b9264e814edb011053620733da48b89edb33838e3787eab77b7cf64118"
     },
     {
-      "path": "releases/0.3.3/style.css",
-      "sha256": "2775e53219a44f982ba3e9803ad11ed4252961534f616d54074b4ca34156a6eb"
+      "path": "releases/0.3.4/style.css",
+      "sha256": "350e7e476e44598a3791a14f1fa4aee68014e7b82fcc2ff82a06ff9d7aa9f9e4"
     },
     {
-      "path": "releases/0.3.3/update.js",
+      "path": "releases/0.3.4/update.js",
       "sha256": "1d0dc77602ebcff63f7af96dd45be0ae61642e061973ca4b0a38c6a6d0a7d226"
     }
   ]

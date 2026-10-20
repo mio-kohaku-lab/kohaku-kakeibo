@@ -12,6 +12,6 @@ const assets=names.map(name=>{
 });
 fs.writeFileSync(path.join(root,'version.json'),JSON.stringify({
   version,
-  notes:['小分類を選んだ後も選択状態を表示したままにしました。','その他に病院・交通費・車関係・その他を追加しました。'],
+  notes:['記録一覧を古い日付順にしました。','日付・曜日・項目・金額をコンパクトな1行にまとめました。'],
   assets
 },null,2)+'\n');

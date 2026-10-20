@@ -95,3 +95,10 @@ test('以前の小分類なしのその他は編集してもそのまま保存�
  $('amount').value='1500';$('entryForm').onsubmit({preventDefault(){},submitter:{id:'save'}});
  const rows=JSON.parse(f.storage.get('kohaku-ledger-v1'));assert.equal(rows[0].amount,1500);assert.equal(rows[0].subcategory,'');assert.equal(rows[0].category,'その他');
 });
+test('記録一覧は古い日付順の1行表示で、同日順と編集対象を保つ',()=>{
+ const f=fixture(),$=f.$;
+ vm.runInContext("rows=[{...rows[0],id:'late',date:'2026-10-20',category:'定期購入品',subcategory:'薬',amount:900},{...rows[0],id:'early',date:'2026-10-16',category:'食費',subcategory:'',amount:2480},{...rows[0],id:'same',date:'2026-10-16',amount:100}];month='2026-10';render()",f.context);
+ const entries=$('content').children;assert.equal(entries.length,3);
+ assert.deepEqual(entries.map(b=>b.children.map(c=>c.textContent)),[['10/16','(金)','食費','¥ 2,480'],['10/16','(金)','外食','¥ 100'],['10/20','(火)','薬','¥ 900']]);
+ entries[2].onclick();assert.equal($('amount').value,'900');assert.equal($('chosenCategory').textContent,'💊 定期購入品 ／ 薬');
+});

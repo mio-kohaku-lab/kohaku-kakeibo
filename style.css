@@ -11,3 +11,9 @@
 @media(max-height:550px){#editor .editor-top{padding-inline:14px}#editor .field-row,#editor #chooseCategory{height:40px}#inputDock .picker-head{height:36px}#categoryPanel #categories button,#categoryPanel #children button{font-size:12px}#editor .editor-bottom{padding-bottom:4px}}
 /* v0.3.2: compact keypad; spare room stays below the keys */
 #amountPanel #keypad{height:min(224px,100%);min-height:176px;grid-template-rows:repeat(4,minmax(44px,1fr))}
+/* v0.3.4: compact chronological ledger rows */
+.entry.compact-entry{display:grid;grid-template-columns:42px 24px minmax(0,1fr) auto;gap:6px;min-height:44px;padding:10px 0;line-height:24px;font-size:13px}
+.compact-entry .entry-date,.compact-entry .entry-weekday{color:#7c8274;white-space:nowrap;font-variant-numeric:tabular-nums}
+.compact-entry .entry-item{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+.compact-entry .entry-amount{font-size:14px;font-weight:500;text-align:right;font-variant-numeric:tabular-nums}
+@media(max-width:350px){.entry.compact-entry{grid-template-columns:38px 22px minmax(0,1fr) auto;gap:4px;font-size:12px}.compact-entry .entry-amount{font-size:13px}}
