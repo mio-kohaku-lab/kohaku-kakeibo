@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const root=path.join(__dirname,'..');
-function fixture(){
+function fixture(session=new Map()){
   const elements=new Map(),handlers={};
   class Element{
     set value(value){this._value=String(value);}
@@ -19,7 +19,7 @@ function fixture(){
   const document={getElementById(id){if(!elements.has(id))elements.set(id,new Element());return elements.get(id);},createElement(tag){return new Element(tag);},createElementNS(ns,tag){return new Element(tag);}};
   const old={id:'old',date:'2026-10-17',amount:1200,category:'QOL',subcategory:'外食',memo:'以前の記録'};
   const storage=new Map([['kohaku-ledger-v1',JSON.stringify([old])]]);
-  const context=vm.createContext({document,Ledger:require('../core.js'),localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},window:{addEventListener:(k,v)=>handlers[k]=v},crypto:require('node:crypto').webcrypto,setTimeout:()=>0,clearTimeout(){},confirm:()=>true,console});
+  const context=vm.createContext({document,sessionStorage:{getItem:k=>session.get(k)||null,setItem:(k,v)=>session.set(k,v)},Ledger:require('../core.js'),localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},window:{addEventListener:(k,v)=>handlers[k]=v},crypto:require('node:crypto').webcrypto,setTimeout:()=>0,clearTimeout(){},confirm:()=>true,console});
   vm.runInContext(fs.readFileSync(path.join(root,'app.js'),'utf8'),context);
   return {$:document.getElementById.bind(document),context,storage,old,handlers};
 }
@@ -121,4 +121,19 @@ test('統計の合計とグラフを別表示にし、月移動と空の月で�
  $('next').onclick();assert.equal($('content').children[0].className,'annotated-chart');
  $('totalsTab').onclick();assert.equal($('content').children[0].tag,'details');assert.equal($('total').textContent,'¥ 1,200');
  $('listTab').onclick();assert.equal($('statsSwitch').hidden,true);assert.equal($('content').children[0].tag,'button');
+});
+test('再読み込み後も過去の月と統計タブを維持し、今月ボタンでは今月へ戻る',()=>{
+ const session=new Map(),f=fixture(session);
+ vm.runInContext("month='2026-04';view='stats';statsView='chart';render()",f.context);
+ const reloaded=fixture(session),$=reloaded.$;
+ assert.equal($('monthTitle').textContent,'2026年 4月');assert.equal($('statsTab').attrs['aria-selected'],true);assert.equal($('chartTab').attrs['aria-pressed'],true);
+ $('today').onclick();assert.equal(vm.runInContext('month===localDate().slice(0,7)',reloaded.context),true);
+ const again=fixture(session);assert.equal(vm.runInContext('month===localDate().slice(0,7)',again.context),true);
+});
+test('壊れた表示設定や保存不可でも記録を表示できる',()=>{
+ for(const value of ['{broken',JSON.stringify({month:'2026-99',view:'unknown',statsView:'unknown'})]){
+  const f=fixture(new Map([['kohaku-ledger-view-v1',value]]));assert.equal(vm.runInContext('month===localDate().slice(0,7)',f.context),true);assert.equal(f.$('listTab').attrs['aria-selected'],true);
+ }
+ const f=fixture({get(){throw Error('blocked');},set(){throw Error('blocked');}});
+ assert.equal(vm.runInContext('rows.length',f.context),1);f.$('prev').onclick();assert.equal(vm.runInContext('storageFailed',f.context),false);
 });

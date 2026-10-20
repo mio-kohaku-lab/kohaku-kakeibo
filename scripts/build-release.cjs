@@ -12,6 +12,6 @@ const assets=names.map(name=>{
 });
 fs.writeFileSync(path.join(root,'version.json'),JSON.stringify({
   version,
-  notes:['月の統計を項目別合計と円グラフの2つのタブに分けました。'],
+  notes:['再読み込みしても表示していた月とタブを保つようにしました。'],
   assets
 },null,2)+'\n');

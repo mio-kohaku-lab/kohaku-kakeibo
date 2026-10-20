@@ -2,11 +2,19 @@ const $=id=>document.getElementById(id), KEY='kohaku-ledger-v1', {categories,val
 const yen=n=>'¥ '+n.toLocaleString('ja-JP');
 const localDate=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
 let month=localDate().slice(0,7),view='list',statsView='totals',rows=[],editing=null,selected='食費',sub='',storageFailed=false;
+const VIEW_KEY='kohaku-ledger-view-v1';
+try{
+  const saved=JSON.parse(sessionStorage.getItem(VIEW_KEY)||'null');
+  if(saved&&/^(19\d{2}|[2-9]\d{3})-(0[1-9]|1[0-2])$/.test(saved.month))month=saved.month;
+  if(saved&&['list','stats'].includes(saved.view))view=saved.view;
+  if(saved&&['totals','chart'].includes(saved.statsView))statsView=saved.statsView;
+}catch{/* Viewing preferences must never prevent access to ledger records. */}
+function rememberView(){try{sessionStorage.setItem(VIEW_KEY,JSON.stringify({month,view,statsView}));}catch{}}
 try{const raw=localStorage.getItem(KEY);rows=raw?validate(JSON.parse(raw)):[];}catch(e){storageFailed=true;}
 function el(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
 function toast(text){$('toast').textContent=text;$('toast').classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('toast').classList.remove('visible'),2600);}
 function persist(next){if(storageFailed)throw Error('保存データを読み込めませんでした。上書きを防ぐため保存を止めています。バックアップから復元してください。');localStorage.setItem(KEY,JSON.stringify(next));rows=next;}
-function render(){const data=monthly(rows,month);$('monthTitle').textContent=`${month.slice(0,4)}年 ${Number(month.slice(5))}月`;$('total').textContent=yen(data.total);$('count').textContent=`${data.entries.length}件`;$('listTab').setAttribute('aria-selected',view==='list');$('statsTab').setAttribute('aria-selected',view==='stats');$('statsSwitch').hidden=view!=='stats';$('totalsTab').setAttribute('aria-pressed',statsView==='totals');$('chartTab').setAttribute('aria-pressed',statsView==='chart');const target=$('content');target.replaceChildren();
+function render(){rememberView();const data=monthly(rows,month);$('monthTitle').textContent=`${month.slice(0,4)}年 ${Number(month.slice(5))}月`;$('total').textContent=yen(data.total);$('count').textContent=`${data.entries.length}件`;$('listTab').setAttribute('aria-selected',view==='list');$('statsTab').setAttribute('aria-selected',view==='stats');$('statsSwitch').hidden=view!=='stats';$('totalsTab').setAttribute('aria-pressed',statsView==='totals');$('chartTab').setAttribute('aria-pressed',statsView==='chart');const target=$('content');target.replaceChildren();
 if(storageFailed)target.append(el('p','保存データを読み込めません。バックアップから復元してください。','error'));
 if(!data.entries.length){const empty=el('div',undefined,'empty');empty.append(el('div','✎','empty-icon'),el('h3','この月の記録はまだありません'),el('p','最初のひとつを、気軽に記録してみよう。'));target.append(empty);return;}
 if(view==='list'){
