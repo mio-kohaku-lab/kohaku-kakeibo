@@ -12,6 +12,6 @@ const assets=names.map(name=>{
 });
 fs.writeFileSync(path.join(root,'version.json'),JSON.stringify({
   version,
-  notes:['設定にインストールボタンと状態表示を追加しました。'],
+  notes:['アイコンの瓶を大きくし、周囲の余白を減らしました。'],
   assets
 },null,2)+'\n');

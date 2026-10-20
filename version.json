@@ -1,23 +1,23 @@
 {
-  "version": "0.3.12",
+  "version": "0.3.13",
   "notes": [
-    "設定にインストールボタンと状態表示を追加しました。"
+    "アイコンの瓶を大きくし、周囲の余白を減らしました。"
   ],
   "assets": [
     {
-      "path": "releases/0.3.12/app.js",
+      "path": "releases/0.3.13/app.js",
       "sha256": "66342eea42b958732adcfc0fdae9331c2ed81643673d634b6c9cfacc60665045"
     },
     {
-      "path": "releases/0.3.12/core.js",
+      "path": "releases/0.3.13/core.js",
       "sha256": "2191768626670d1f325ee5cd9f0d53ea76022b6494d7da1ab078a7e2378db3a5"
     },
     {
-      "path": "releases/0.3.12/style.css",
+      "path": "releases/0.3.13/style.css",
       "sha256": "dc759be87ad7765acba9fc568f98cb11e4ff55058fc17e7196cb99b88d8d6a4a"
     },
     {
-      "path": "releases/0.3.12/update.js",
+      "path": "releases/0.3.13/update.js",
       "sha256": "1d0dc77602ebcff63f7af96dd45be0ae61642e061973ca4b0a38c6a6d0a7d226"
     }
   ]
