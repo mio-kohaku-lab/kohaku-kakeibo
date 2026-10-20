@@ -12,6 +12,6 @@ const assets=names.map(name=>{
 });
 fs.writeFileSync(path.join(root,'version.json'),JSON.stringify({
   version,
-  notes:['葉っぱと淡い緑の背景が収まるようにアイコンの大きさを調整しました。'],
+  notes:['承認済みの拡大した貯金びんアイコンに更新しました。'],
   assets
 },null,2)+'\n');

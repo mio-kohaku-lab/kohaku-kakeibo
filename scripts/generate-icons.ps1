@@ -4,7 +4,7 @@ Add-Type -AssemblyName System.Drawing
 $iconDirectory = Join-Path $PSScriptRoot '../icons'
 $sourceImage = [System.Drawing.Bitmap]::new((Resolve-Path -LiteralPath $Source).Path)
 try {
- foreach ($item in @(@(32,'jar-balanced-favicon.png',1.0),@(192,'jar-balanced-192.png',1.0),@(512,'jar-balanced-512.png',1.0),@(512,'jar-balanced-maskable-512.png',0.9),@(180,'jar-balanced-apple-touch.png',1.0))) {
+ foreach ($item in @(@(32,'jar-final-v3-favicon.png',1.0),@(192,'jar-final-v3-192.png',1.0),@(512,'jar-final-v3-512.png',1.0),@(512,'jar-final-v3-maskable-512.png',0.65),@(180,'jar-final-v3-apple-touch.png',1.0))) {
   $size=[int]$item[0];$scale=[double]$item[2]
   $bitmap=[System.Drawing.Bitmap]::new($size,$size)
   $g=[System.Drawing.Graphics]::FromImage($bitmap)
