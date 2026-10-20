@@ -12,6 +12,6 @@ const assets=names.map(name=>{
 });
 fs.writeFileSync(path.join(root,'version.json'),JSON.stringify({
   version,
-  notes:['日付・金額・分類の位置を固定し、下の入力パネルだけ切り替えるようにしました。','専用テンキーと月送りカレンダーを追加しました。','記録やバックアップはそのまま使えます。'],
+  notes:['メモ入力欄を削除しました。','分類を6行とも画面内に収める配置にしました。','更新ページをバージョンと更新操作中心に簡素化しました。'],
   assets
 },null,2)+'\n');

@@ -37,7 +37,7 @@ test('分類のキャンセルは元の内訳を保持し、確定後の保存�
   assert.equal($('categoryPanel').hidden,true);
   $('entryForm').onsubmit({preventDefault(){},submitter:{id:'save'}});
   const rows=JSON.parse(f.storage.get('kohaku-ledger-v1'));
-  assert.equal(rows.length,1);assert.equal(rows[0].id,'old');assert.equal(rows[0].amount,1200);assert.equal(rows[0].subcategory,'水道代');
+  assert.equal(rows.length,1);assert.equal(rows[0].id,'old');assert.equal(rows[0].amount,1200);assert.equal(rows[0].subcategory,'水道代');assert.equal(rows[0].memo,f.old.memo);
 });
 test('小分類なしの大分類は即確定し、連続入力で保存データを失わない',()=>{
   const f=fixture(),$=f.$;
@@ -50,7 +50,7 @@ test('小分類なしの大分類は即確定し、連続入力で保存デー�
   assert.equal(rows.length,2);assert.deepEqual(rows[0],f.old);assert.equal(rows[1].category,'食費');assert.equal(rows[1].subcategory,'');
   let warned=false;
   f.handlers.beforeunload({preventDefault(){warned=true;}});assert.equal(warned,false);
-  $('memo').value='編集中';f.handlers.beforeunload({preventDefault(){warned=true;}});assert.equal(warned,true);
+  $('amount').value='123';f.handlers.beforeunload({preventDefault(){warned=true;}});assert.equal(warned,true);
 });
 test('入力パネルの切り替えとテンキーは未保存の入力を保持する',()=>{
  const f=fixture(),$=f.$;$('add').onclick();

@@ -1,26 +1,26 @@
 {
-  "version": "0.3.0",
+  "version": "0.3.1",
   "notes": [
-    "日付・金額・分類の位置を固定し、下の入力パネルだけ切り替えるようにしました。",
-    "専用テンキーと月送りカレンダーを追加しました。",
-    "記録やバックアップはそのまま使えます。"
+    "メモ入力欄を削除しました。",
+    "分類を6行とも画面内に収める配置にしました。",
+    "更新ページをバージョンと更新操作中心に簡素化しました。"
   ],
   "assets": [
     {
-      "path": "releases/0.3.0/app.js",
-      "sha256": "ec371ff4be51de30cfb300a9c86c154cb09b4ce75632fee689d9d448bde17ab1"
+      "path": "releases/0.3.1/app.js",
+      "sha256": "bfe4261789deb9e42d3bbd4684469077dbfd20874ad8470a1c015a30e6e39b18"
     },
     {
-      "path": "releases/0.3.0/core.js",
+      "path": "releases/0.3.1/core.js",
       "sha256": "89ed2231b604d9527d45e13ecb84c0b1ef834e6eeecf5e9dd2bfe2ea60ada934"
     },
     {
-      "path": "releases/0.3.0/style.css",
-      "sha256": "2dfb0733bfbe465b89904782cbbf1378325a6df37dd5964fb33b9758a43d0abf"
+      "path": "releases/0.3.1/style.css",
+      "sha256": "7b5e0f3c11113261ad9c1295dc89d10a9e0536fd708923dded2a5ff16dda3f9c"
     },
     {
-      "path": "releases/0.3.0/update.js",
-      "sha256": "c5f998e14a37db59dc9c2130c05480e71c4154c0a3fbf0a9f4096b5b84e595e7"
+      "path": "releases/0.3.1/update.js",
+      "sha256": "1d0dc77602ebcff63f7af96dd45be0ae61642e061973ca4b0a38c6a6d0a7d226"
     }
   ]
 }

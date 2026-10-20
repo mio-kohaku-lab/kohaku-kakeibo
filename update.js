@@ -24,8 +24,6 @@
     if(!/^\d+\.\d+\.\d+$/.test(data.version)||!Array.isArray(data.notes)||!Array.isArray(data.assets)||data.assets.length!==4)throw Error('更新情報を読み込めません。');
     for(const asset of data.assets){assetURL(asset.path);if(!/^[a-f0-9]{64}$/.test(asset.sha256))throw Error('更新情報が不正です。');}
     release=data;$('latestVersion').textContent='Ver.'+data.version;
-    $('releaseNotes').replaceChildren();
-    for(const note of data.notes){const li=document.createElement('li');li.textContent=note;$('releaseNotes').append(li);}
     button.disabled=false;button.textContent=from===data.version?'最新版を読み直す':'最新版を準備する';
     status.textContent=from===data.version?'最新版を使用しています。表示がおかしい場合は読み直せます。':'準備ができたら、家計簿を開いて更新を反映できます。';
   }
