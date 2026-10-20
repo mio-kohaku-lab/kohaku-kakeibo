@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "notes": [
+    "大分類を左、小分類を右に並べて選べるようになりました。",
+    "食費など小分類がないものは1回押すだけで確定します。",
+    "設定にバージョン表示と更新ページを追加しました。"
+  ],
+  "assets": [
+    {
+      "path": "releases/0.2.0/app.js",
+      "sha256": "d1b581a214429ef47fef6c3cd5add42edfd49b81ce2e11191e1ee0b2a173f216"
+    },
+    {
+      "path": "releases/0.2.0/core.js",
+      "sha256": "89ed2231b604d9527d45e13ecb84c0b1ef834e6eeecf5e9dd2bfe2ea60ada934"
+    },
+    {
+      "path": "releases/0.2.0/style.css",
+      "sha256": "3ab32e4189517f3301a0601695a7b1997feadd2a0a672338c2ba0293f4b5c579"
+    },
+    {
+      "path": "releases/0.2.0/update.js",
+      "sha256": "c5f998e14a37db59dc9c2130c05480e71c4154c0a3fbf0a9f4096b5b84e595e7"
+    }
+  ]
+}

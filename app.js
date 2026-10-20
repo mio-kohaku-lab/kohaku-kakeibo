@@ -13,10 +13,60 @@ if(view==='list'){let day='';for(const r of data.entries){if(day!==r.date){day=r
 else{const chart=el('div',undefined,'chart-wrap'),ring=el('div',undefined,'donut');let start=0;const stops=data.groups.filter(c=>c.total).map(c=>{const end=start+c.total/data.total*100;const s=`${c.color} ${start}% ${end}%`;start=end;return s;});ring.style.background=`conic-gradient(${stops.join(',')})`;ring.setAttribute('role','img');ring.setAttribute('aria-label','カテゴリ別支出の割合。内訳は下の一覧に表示。');const center=el('div',undefined,'donut-center');center.append(el('small','支出の内訳'),el('strong',`${data.groups.filter(c=>c.total).length}カテゴリ`));ring.append(center);chart.append(ring);target.append(chart);for(const c of data.groups.filter(c=>c.total).sort((a,b)=>b.total-a.total)){const details=el('details',undefined,'stat-row'),summary=el('summary');const dot=el('span','●');dot.style.color=c.color;summary.append(dot,el('strong',`${c.icon} ${c.name}`),el('span',`${(c.total/data.total*100).toFixed(1)}%`,'percent'),el('strong',yen(c.total)));details.append(summary);const subs=[...new Set(data.entries.filter(r=>r.category===c.name).map(r=>r.subcategory))];for(const s of subs){const line=el('div',undefined,'sub-row');line.append(el('span',s||'内訳なし'),el('span',yen(data.entries.filter(r=>r.category===c.name&&r.subcategory===s).reduce((a,r)=>a+r.amount,0))));details.append(line);}target.append(details);}}}
 function shift(n){const d=new Date(Number(month.slice(0,4)),Number(month.slice(5))-1+n,1);month=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;render();}
 $('prev').onclick=()=>shift(-1);$('next').onclick=()=>shift(1);$('today').onclick=()=>{month=localDate().slice(0,7);render();};$('listTab').onclick=()=>{view='list';render();};$('statsTab').onclick=()=>{view='stats';render();};
-function renderCategories(){$('categories').replaceChildren();for(const c of categories){const b=el('button',`${c.icon} ${c.name}`,selected===c.name?'selected':'');b.type='button';b.setAttribute('aria-pressed',selected===c.name);b.onclick=()=>{if(selected!==c.name)sub='';selected=c.name;renderCategories();};$('categories').append(b);}$('children').replaceChildren();for(const name of categories.find(c=>c.name===selected).children){const b=el('button',name,sub===name?'selected':'');b.type='button';b.setAttribute('aria-pressed',sub===name);b.onclick=()=>{sub=name;renderCategories();};$('children').append(b);}}
-function openEditor(r){editing=r?.id||null;selected=r?.category||'食費';sub=r?.subcategory||'';$('editorTitle').textContent=r?'記録を編集':'支出を記録';$('amount').value=r?.amount||'';$('date').value=r?.date||localDate();$('memo').value=r?.memo||'';$('formError').textContent='';$('delete').hidden=!r;$('continue').hidden=!!r;renderCategories();$('editor').showModal();$('amount').focus();}
+
+let browsingCategory = selected;
+function categoryLabel(){
+  const c=categories.find(c=>c.name===selected);
+  $('chosenCategory').textContent=c.icon+' '+c.name+(sub?' ／ '+sub:'');
+}
+function commitCategory(category,child=''){
+  selected=category;sub=child;categoryLabel();$('categoryPicker').close();
+  $('chooseCategory').focus();
+}
+function renderCategories(){
+  $('categories').replaceChildren();
+  for(const c of categories){
+    const b=el('button',undefined,browsingCategory===c.name?'selected':'');
+    b.type='button';b.setAttribute('aria-pressed',browsingCategory===c.name);
+    b.append(el('span',c.icon+' '+c.name));
+    if(c.children.length)b.append(el('span','›','category-arrow'));
+    b.onclick=()=>{
+      if(!c.children.length){commitCategory(c.name);return;}
+      browsingCategory=c.name;renderCategories();
+      $('categories').querySelectorAll('button')[categories.indexOf(c)].focus();
+    };
+    $('categories').append(b);
+  }
+  const c=categories.find(c=>c.name===browsingCategory);
+  $('children').replaceChildren();
+  for(const name of c.children){
+    const active=selected===c.name&&sub===name;
+    const b=el('button',name,active?'selected':'');
+    b.type='button';b.setAttribute('aria-pressed',active);
+    b.onclick=()=>commitCategory(c.name,name);$('children').append(b);
+  }
+  $('pickerHelp').textContent=c.children.length?c.name+'の小分類を右側から選んでください':'大分類を押すと確定します';
+}
+$('chooseCategory').onclick=()=>{
+  document.activeElement?.blur();browsingCategory=selected;renderCategories();
+  $('categoryPicker').showModal();
+};
+$('closeCategory').onclick=()=>$('categoryPicker').close();
+$('categoryPicker').addEventListener('click',e=>{
+  if(e.target===$('categoryPicker')){
+    const r=e.target.getBoundingClientRect();
+    if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();
+  }
+});
+function formSnapshot(){return JSON.stringify([$('amount').value,$('date').value,$('memo').value,selected,sub]);}
+let savedForm='';
+window.addEventListener('beforeunload',e=>{
+  if($('editor').open&&formSnapshot()!==savedForm){e.preventDefault();e.returnValue='';}
+});
+
+function openEditor(r){editing=r?.id||null;selected=r?.category||'食費';sub=r?.subcategory||'';$('editorTitle').textContent=r?'記録を編集':'支出を記録';$('amount').value=r?.amount||'';$('date').value=r?.date||localDate();$('memo').value=r?.memo||'';$('formError').textContent='';$('delete').hidden=!r;$('continue').hidden=!!r;categoryLabel();savedForm=formSnapshot();$('editor').showModal();$('amount').focus();}
 $('add').onclick=()=>openEditor();$('closeEditor').onclick=()=>$('editor').close();
-$('entryForm').onsubmit=e=>{e.preventDefault();const amount=Number($('amount').value.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace(/[,，]/g,''));if(!Number.isSafeInteger(amount)||amount<=0||amount>999999999){$('formError').textContent='金額は1〜999,999,999円の整数で入力してください。';return;}if(categories.find(c=>c.name===selected).children.length&&!sub){$('formError').textContent='分類の内訳を選んでください。';return;}const r={id:editing||crypto.randomUUID(),date:$('date').value,amount,category:selected,subcategory:sub,memo:$('memo').value.trim()};try{validate([r]);persist(editing?rows.map(x=>x.id===editing?r:x):[...rows,r]);}catch(err){$('formError').textContent='保存できませんでした。'+err.message;return;}month=r.date.slice(0,7);render();toast('記録しました');if(e.submitter?.id==='continue'){$('amount').value='';$('memo').value='';$('formError').textContent='';$('amount').focus();}else $('editor').close();};
+$('entryForm').onsubmit=e=>{e.preventDefault();const amount=Number($('amount').value.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace(/[,，]/g,''));if(!Number.isSafeInteger(amount)||amount<=0||amount>999999999){$('formError').textContent='金額は1〜999,999,999円の整数で入力してください。';return;}if(categories.find(c=>c.name===selected).children.length&&!sub){$('formError').textContent='分類の内訳を選んでください。';return;}const r={id:editing||crypto.randomUUID(),date:$('date').value,amount,category:selected,subcategory:sub,memo:$('memo').value.trim()};try{validate([r]);persist(editing?rows.map(x=>x.id===editing?r:x):[...rows,r]);}catch(err){$('formError').textContent='保存できませんでした。'+err.message;return;}month=r.date.slice(0,7);render();toast('記録しました');if(e.submitter?.id==='continue'){$('amount').value='';$('memo').value='';$('formError').textContent='';$('amount').focus();savedForm=formSnapshot();}else $('editor').close();};
 $('delete').onclick=()=>{if(!confirm('この記録を削除しますか？'))return;try{persist(rows.filter(r=>r.id!==editing));$('editor').close();render();toast('削除しました');}catch(e){$('formError').textContent='削除できませんでした。'+e.message;}};
 function openBackup(){$('backupError').textContent='';$('backup').showModal();}$('settings').onclick=openBackup;$('backupLink').onclick=openBackup;$('closeBackup').onclick=()=>$('backup').close();
 $('export').onclick=()=>{if(storageFailed){$('backupError').textContent='保存データを読み込めないため、書き出しを停止しています。';return;}const blob=new Blob([JSON.stringify({format:'kohaku-ledger',version:1,exportedAt:new Date().toISOString(),entries:rows},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=el('a');a.href=url;a.download=`kohaku-kakeibo-${localDate()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);toast('バックアップを書き出しました');};
