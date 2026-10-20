@@ -12,6 +12,6 @@ const assets=names.map(name=>{
 });
 fs.writeFileSync(path.join(root,'version.json'),JSON.stringify({
   version,
-  notes:['再読み込みしても表示していた月とタブを保つようにしました。'],
+  notes:['前年比タブに大分類別の棒グラフを追加しました。','選択月の金額順に、前年同月の棒を右隣へ並べています。'],
   assets
 },null,2)+'\n');

@@ -3,5 +3,11 @@ const categories=[{name:'食費',icon:'🍜',color:'#dd8460',children:[]},{name:
 function validDate(s){if(typeof s!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(s)||s<'1900-01-01'||s>'9999-12-31')return false;const d=new Date(s+'T12:00:00Z');return !isNaN(d)&&d.toISOString().slice(0,10)===s;}
 function validate(rows){if(!Array.isArray(rows)||rows.length>100000)throw Error('記録の形式が正しくありません。');const ids=new Set();for(const r of rows){const c=categories.find(c=>c.name===r?.category);if(!r||typeof r.id!=='string'||!r.id||ids.has(r.id)||!validDate(r.date)||!Number.isSafeInteger(r.amount)||r.amount<=0||r.amount>999999999||!c||!(r.subcategory===''||c.children.includes(r.subcategory))||typeof r.memo!=='string'||r.memo.length>200)throw Error('読み込めない記録が含まれています。');ids.add(r.id);}return rows.map(({id,date,amount,category,subcategory,memo})=>({id,date,amount,category,subcategory,memo}));}
 function monthly(rows,month){const entries=rows.filter(r=>r.date.slice(0,7)===month).reverse().sort((a,b)=>b.date.localeCompare(a.date));return {entries,total:entries.reduce((s,r)=>s+r.amount,0),groups:categories.map(c=>({...c,total:entries.filter(r=>r.category===c.name).reduce((s,r)=>s+r.amount,0)}))};}
-const api={categories,validate,monthly};if(typeof module!=='undefined')module.exports=api;else root.Ledger=api;
+function yearComparison(rows,month){
+ const previousMonth=String(Number(month.slice(0,4))-1).padStart(4,'0')+month.slice(4);
+ const current=monthly(rows,month),previous=monthly(rows,previousMonth);
+ return {month,previousMonth,hasCurrent:!!current.entries.length,hasPrevious:!!previous.entries.length,
+ groups:current.groups.map((c,i)=>({...c,current:current.entries.length?c.total:null,previous:previous.entries.length?previous.groups[i].total:null})).sort((a,b)=>(b.current||0)-(a.current||0))};
+}
+const api={categories,validate,monthly,yearComparison};if(typeof module!=='undefined')module.exports=api;else root.Ledger=api;
 })(globalThis);

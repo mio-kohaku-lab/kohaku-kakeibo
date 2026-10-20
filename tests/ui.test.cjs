@@ -137,3 +137,14 @@ test('壊れた表示設定や保存不可でも記録を表示できる',()=>{
  const f=fixture({get(){throw Error('blocked');},set(){throw Error('blocked');}});
  assert.equal(vm.runInContext('rows.length',f.context),1);f.$('prev').onclick();assert.equal(vm.runInContext('storageFailed',f.context),false);
 });
+test('前年比タブは前年だけある月も表示し、共通目盛りと左右の棒を維持する',()=>{
+ const session=new Map(),f=fixture(session),$=f.$;
+ vm.runInContext("rows=[{...rows[0],category:'食費',subcategory:'',amount:100},{...rows[0],id:'last-year',date:'2025-10-01',category:'食費',subcategory:'',amount:200}];month='2026-10';view='stats';render()",f.context);
+ $('yearTab').onclick();assert.equal($('yearTab').attrs['aria-pressed'],true);
+ let wrap=$('content').children[0];assert.equal(wrap.className,'year-chart');
+ let svg=wrap.children.find(n=>n.className==='bar-scroll').children[0];
+ const bars=svg.children.filter(n=>n.tag==='rect');assert.equal(bars.length,12);assert.equal(Number(bars[1].attrs.height),Number(bars[0].attrs.height)*2);assert.ok(bars[1].attrs.x>bars[0].attrs.x);
+ vm.runInContext("month='2027-10';render()",f.context);wrap=$('content').children[0];assert.equal(wrap.className,'year-chart');assert.ok(wrap.children.some(n=>n.textContent?.includes('選択月の記録はありません')));
+ assert.equal(fixture(session).$('yearTab').attrs['aria-pressed'],true);
+ vm.runInContext("month='2030-01';render()",f.context);assert.equal($('content').children[0].children.some(n=>n.className==='bar-scroll'),false);
+});

@@ -1,4 +1,4 @@
-const $=id=>document.getElementById(id), KEY='kohaku-ledger-v1', {categories,validate,monthly}=Ledger;
+const $=id=>document.getElementById(id), KEY='kohaku-ledger-v1', {categories,validate,monthly,yearComparison}=Ledger;
 const yen=n=>'¥ '+n.toLocaleString('ja-JP');
 const localDate=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
 let month=localDate().slice(0,7),view='list',statsView='totals',rows=[],editing=null,selected='食費',sub='',storageFailed=false;
@@ -7,15 +7,16 @@ try{
   const saved=JSON.parse(sessionStorage.getItem(VIEW_KEY)||'null');
   if(saved&&/^(19\d{2}|[2-9]\d{3})-(0[1-9]|1[0-2])$/.test(saved.month))month=saved.month;
   if(saved&&['list','stats'].includes(saved.view))view=saved.view;
-  if(saved&&['totals','chart'].includes(saved.statsView))statsView=saved.statsView;
+  if(saved&&['totals','chart','year'].includes(saved.statsView))statsView=saved.statsView;
 }catch{/* Viewing preferences must never prevent access to ledger records. */}
 function rememberView(){try{sessionStorage.setItem(VIEW_KEY,JSON.stringify({month,view,statsView}));}catch{}}
 try{const raw=localStorage.getItem(KEY);rows=raw?validate(JSON.parse(raw)):[];}catch(e){storageFailed=true;}
 function el(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
 function toast(text){$('toast').textContent=text;$('toast').classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('toast').classList.remove('visible'),2600);}
 function persist(next){if(storageFailed)throw Error('保存データを読み込めませんでした。上書きを防ぐため保存を止めています。バックアップから復元してください。');localStorage.setItem(KEY,JSON.stringify(next));rows=next;}
-function render(){rememberView();const data=monthly(rows,month);$('monthTitle').textContent=`${month.slice(0,4)}年 ${Number(month.slice(5))}月`;$('total').textContent=yen(data.total);$('count').textContent=`${data.entries.length}件`;$('listTab').setAttribute('aria-selected',view==='list');$('statsTab').setAttribute('aria-selected',view==='stats');$('statsSwitch').hidden=view!=='stats';$('totalsTab').setAttribute('aria-pressed',statsView==='totals');$('chartTab').setAttribute('aria-pressed',statsView==='chart');const target=$('content');target.replaceChildren();
+function render(){rememberView();const data=monthly(rows,month);$('monthTitle').textContent=`${month.slice(0,4)}年 ${Number(month.slice(5))}月`;$('total').textContent=yen(data.total);$('count').textContent=`${data.entries.length}件`;$('listTab').setAttribute('aria-selected',view==='list');$('statsTab').setAttribute('aria-selected',view==='stats');$('statsSwitch').hidden=view!=='stats';$('totalsTab').setAttribute('aria-pressed',statsView==='totals');$('chartTab').setAttribute('aria-pressed',statsView==='chart');$('yearTab').setAttribute('aria-pressed',statsView==='year');const target=$('content');target.replaceChildren();
 if(storageFailed)target.append(el('p','保存データを読み込めません。バックアップから復元してください。','error'));
+if(view==='stats'&&statsView==='year'){target.append(yearChart(yearComparison(rows,month)));return;}
 if(!data.entries.length){const empty=el('div',undefined,'empty');empty.append(el('div','✎','empty-icon'),el('h3','この月の記録はまだありません'),el('p','最初のひとつを、気軽に記録してみよう。'));target.append(empty);return;}
 if(view==='list'){
   for(const r of data.entries){
@@ -28,6 +29,33 @@ if(view==='list'){
   }
 }
 else{if(statsView==='chart'){target.append(spendingChart(data));return;}for(const c of data.groups.filter(c=>c.total).sort((a,b)=>b.total-a.total)){const details=el('details',undefined,'stat-row'),summary=el('summary');const dot=el('span','●');dot.style.color=c.color;summary.append(dot,el('strong',`${c.icon} ${c.name}`),el('span',`${(c.total/data.total*100).toFixed(1)}%`,'percent'),el('strong',yen(c.total)));details.append(summary);const subs=[...new Set(data.entries.filter(r=>r.category===c.name).map(r=>r.subcategory))];for(const s of subs){const line=el('div',undefined,'sub-row');line.append(el('span',s||'内訳なし'),el('span',yen(data.entries.filter(r=>r.category===c.name&&r.subcategory===s).reduce((a,r)=>a+r.amount,0))));details.append(line);}target.append(details);}}}
+function yearChart(data){
+ const wrap=el('section',undefined,'year-chart');
+ const legend=el('div',undefined,'year-legend');
+ legend.append(el('span',`${data.month.replace('-','年')}月`,'year-current'),el('span',`${data.previousMonth.replace('-','年')}月`,'year-previous'));wrap.append(legend);
+ wrap.append(el('p','左から選択月の金額順。同じ分類の右側が前年同月です。','year-note'));
+ if(!data.hasCurrent||!data.hasPrevious)wrap.append(el('p',(!data.hasCurrent?'選択月':'')+(!data.hasCurrent&&!data.hasPrevious?'・':'')+(!data.hasPrevious?'前年同月':'')+'の記録はありません（データなし）。','year-note'));
+ if(!data.hasCurrent&&!data.hasPrevious)return wrap;
+ const svg=(tag,attrs,text)=>{const n=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n;};
+ const max=Math.max(1,...data.groups.flatMap(g=>[g.current||0,g.previous||0]));
+ const unit=10**Math.floor(Math.log10(max));const limit=Math.ceil(max/unit)*unit;
+ const slot=Math.max(48,max.toLocaleString('ja-JP').length*6+8),groupWidth=slot*2+24,width=56+groupWidth*data.groups.length;
+ const chart=svg('svg',{viewBox:`0 0 ${width} 320`,width,height:320,role:'img','aria-label':'大分類ごとの選択月と前年同月の支出比較。選択月の金額が高い順、各組の左が選択月、右が前年同月。'});
+ for(let i=0;i<=4;i++){const y=260-i*54;chart.append(svg('line',{x1:50,x2:width-8,y1:y,y2:y,stroke:'#e1e4d8'}));chart.append(svg('text',{x:44,y:y+4,'text-anchor':'end',class:'bar-axis'},limit*i/4>=100000000?(limit*i/4/100000000).toLocaleString('ja-JP',{maximumFractionDigits:1})+'億':limit*i/4>=10000?(limit*i/4/10000).toLocaleString('ja-JP',{maximumFractionDigits:1})+'万':(limit*i/4).toLocaleString('ja-JP',{maximumFractionDigits:0})));}
+ chart.append(svg('text',{x:44,y:24,'text-anchor':'end',class:'bar-axis'},'円'));
+ data.groups.forEach((g,i)=>{
+  const left=56+i*groupWidth;
+  for(const [j,value] of [g.current,g.previous].entries()){
+   const center=left+12+slot*(j+0.5),h=value===null?0:value/limit*216;
+   const bar=svg('rect',{x:center-15,y:260-h,width:30,height:h,rx:3,fill:j?'#c9b48e':'#6d7d52',class:j?'previous-bar':'current-bar'});
+   bar.append(svg('title',{},`${g.name} ${j?data.previousMonth:data.month} ${value===null?'データなし':yen(value)}`));chart.append(bar);
+   chart.append(svg('text',{x:center,y:Math.max(32,252-h),'text-anchor':'middle',class:'bar-value'},value===null?'—':value.toLocaleString('ja-JP')));
+  }
+  chart.append(svg('text',{x:left+12+slot,y:287,'text-anchor':'middle',class:'bar-category'},g.name));
+ });
+ const scroll=el('div',undefined,'bar-scroll');scroll.setAttribute('tabindex','0');scroll.setAttribute('aria-label','棒グラフ。横にスクロールして全分類を確認できます。');scroll.append(chart);wrap.append(scroll,el('p','横にスクロールすると、すべての分類を見られます。','year-note'));
+ return wrap;
+}
 function spendingChart(data){
   const wrap=el('div',undefined,'annotated-chart');
   const svg=(tag,attrs,text)=>{const n=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n;};
@@ -64,6 +92,7 @@ $('prev').onclick=()=>shift(-1);$('next').onclick=()=>shift(1);$('today').onclic
 
 $('totalsTab').onclick=()=>{statsView='totals';render();};
 $('chartTab').onclick=()=>{statsView='chart';render();};
+$('yearTab').onclick=()=>{statsView='year';render();};
 
 let browsingCategory = selected;
 function categoryLabel(){

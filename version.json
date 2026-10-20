@@ -1,23 +1,24 @@
 {
-  "version": "0.3.8",
+  "version": "0.3.9",
   "notes": [
-    "再読み込みしても表示していた月とタブを保つようにしました。"
+    "前年比タブに大分類別の棒グラフを追加しました。",
+    "選択月の金額順に、前年同月の棒を右隣へ並べています。"
   ],
   "assets": [
     {
-      "path": "releases/0.3.8/app.js",
-      "sha256": "9c8f3f54ebb500df23f523248193c4e8b0d571051c859c71fc9b35c54462361c"
+      "path": "releases/0.3.9/app.js",
+      "sha256": "56c9a11cf30e5964c33a3aac9c9c1e7dd02d1ab35d7b44da8880be5f493eb4cb"
     },
     {
-      "path": "releases/0.3.8/core.js",
-      "sha256": "d962489a62e495c8f90cd4e6894578f603ecb7cce133fe7dd91e9f7c5948f85a"
+      "path": "releases/0.3.9/core.js",
+      "sha256": "2191768626670d1f325ee5cd9f0d53ea76022b6494d7da1ab078a7e2378db3a5"
     },
     {
-      "path": "releases/0.3.8/style.css",
-      "sha256": "fcd85232d2380d6db2212940e8647e2b51f4c074ecb4533d40de2f55792f3054"
+      "path": "releases/0.3.9/style.css",
+      "sha256": "7fff891b47038e60f5e6cb480437c4048a01d77fa1553073a2f6c4734bd19865"
     },
     {
-      "path": "releases/0.3.8/update.js",
+      "path": "releases/0.3.9/update.js",
       "sha256": "1d0dc77602ebcff63f7af96dd45be0ae61642e061973ca4b0a38c6a6d0a7d226"
     }
   ]
