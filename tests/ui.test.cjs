@@ -148,3 +148,16 @@ test('前年比タブは前年だけある月も表示し、共通目盛りと�
  assert.equal(fixture(session).$('yearTab').attrs['aria-pressed'],true);
  vm.runInContext("month='2030-01';render()",f.context);assert.equal($('content').children[0].children.some(n=>n.className==='bar-frame'),false);
 });
+test('インストール許可なしをインストール済みと誤認せず、同じ許可は一度だけ使う',async()=>{
+ const f=fixture(),$=f.$;const before=f.storage.get('kohaku-ledger-v1');
+ await $('installApp').onclick();assert.match($('installStatus').textContent,/許可がまだ届いていません/);assert.equal($('installApp').disabled,false);
+ let calls=0;f.handlers.beforeinstallprompt({preventDefault(){},prompt:async()=>{calls++;},userChoice:Promise.resolve({outcome:'dismissed'})});
+ await $('installApp').onclick();assert.equal(calls,1);assert.match($('installStatus').textContent,/キャンセル/);
+ await $('installApp').onclick();assert.equal(calls,1);assert.equal(f.storage.get('kohaku-ledger-v1'),before);
+});
+test('インストールの承認・受付・失敗を表示し、記録は変更しない',async()=>{
+ const f=fixture(),$=f.$;
+ f.handlers.beforeinstallprompt({preventDefault(){},prompt:async()=>{},userChoice:Promise.resolve({outcome:'accepted'})});await $('installApp').onclick();assert.match($('installStatus').textContent,/承認/);
+ f.handlers.appinstalled();assert.equal($('installApp').disabled,true);assert.match($('installStatus').textContent,/受け付け/);
+ const bad=fixture();bad.handlers.beforeinstallprompt({preventDefault(){},prompt:async()=>{throw Error('unavailable');}});await bad.$('installApp').onclick();assert.equal(bad.$('installApp').disabled,false);assert.match(bad.$('installStatus').textContent,/開けませんでした/);
+});

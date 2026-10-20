@@ -1,23 +1,23 @@
 {
-  "version": "0.3.11",
+  "version": "0.3.12",
   "notes": [
-    "ホーム画面とブラウザのアイコンを、コインと葉っぱの瓶のイラストに変更しました。"
+    "設定にインストールボタンと状態表示を追加しました。"
   ],
   "assets": [
     {
-      "path": "releases/0.3.11/app.js",
-      "sha256": "671058fdbebfe6349e57e173832a028a7c4bf85733546396f4413751ed0cb292"
+      "path": "releases/0.3.12/app.js",
+      "sha256": "66342eea42b958732adcfc0fdae9331c2ed81643673d634b6c9cfacc60665045"
     },
     {
-      "path": "releases/0.3.11/core.js",
+      "path": "releases/0.3.12/core.js",
       "sha256": "2191768626670d1f325ee5cd9f0d53ea76022b6494d7da1ab078a7e2378db3a5"
     },
     {
-      "path": "releases/0.3.11/style.css",
-      "sha256": "2cdd2c6a53867810e6a28a76ffd5ee06ddab7c56b72383a77ac2dddc16ba4c74"
+      "path": "releases/0.3.12/style.css",
+      "sha256": "dc759be87ad7765acba9fc568f98cb11e4ff55058fc17e7196cb99b88d8d6a4a"
     },
     {
-      "path": "releases/0.3.11/update.js",
+      "path": "releases/0.3.12/update.js",
       "sha256": "1d0dc77602ebcff63f7af96dd45be0ae61642e061973ca4b0a38c6a6d0a7d226"
     }
   ]

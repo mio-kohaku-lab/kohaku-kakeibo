@@ -194,7 +194,29 @@ function openEditor(r){editing=r?.id||null;selected=r?.category||'食費';sub=r?
 $('add').onclick=()=>openEditor();$('closeEditor').onclick=()=>$('editor').close();
 $('entryForm').onsubmit=e=>{e.preventDefault();const amount=Number($('amount').value.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace(/[,，]/g,''));if(!Number.isSafeInteger(amount)||amount<=0||amount>999999999){$('formError').textContent='金額は1〜999,999,999円の整数で入力してください。';return;}if(categories.find(c=>c.name===selected).children.length&&!sub&&!(selected==='その他'&&editing&&rows.some(x=>x.id===editing&&x.category==='その他'&&x.subcategory===''))){$('formError').textContent='分類の内訳を選んでください。';return;}const r={id:editing||crypto.randomUUID(),date:$('date').value,amount,category:selected,subcategory:sub,memo:editing?(rows.find(x=>x.id===editing)?.memo||''):''};try{validate([r]);persist(editing?rows.map(x=>x.id===editing?r:x):[...rows,r]);}catch(err){$('formError').textContent='保存できませんでした。'+err.message;return;}month=r.date.slice(0,7);render();toast('記録しました');if(e.submitter?.id==='continue'){$('amount').value='';$('formError').textContent='';setPanel('amount');$('chooseAmount').focus();savedForm=formSnapshot();}else $('editor').close();};
 $('delete').onclick=()=>{if(!confirm('この記録を削除しますか？'))return;try{persist(rows.filter(r=>r.id!==editing));$('editor').close();render();toast('削除しました');}catch(e){$('formError').textContent='削除できませんでした。'+e.message;}};
-function openBackup(){$('backupError').textContent='';$('backup').showModal();}$('settings').onclick=openBackup;$('backupLink').onclick=openBackup;$('closeBackup').onclick=()=>$('backup').close();
+let installPrompt=null,installBusy=false,installConfirmed=false;
+const standalone=()=>!!(window.matchMedia?.('(display-mode: standalone)').matches||window.navigator?.standalone);
+function installUI(message){
+ const running=standalone(),button=$('installApp');
+ button.disabled=running||installConfirmed||installBusy;
+ button.textContent=running?'アプリで起動中':installConfirmed?'インストールを受け付けました':installBusy?'確認中…':'インストール';
+ $('installStatus').textContent=message||(running?'ホーム画面からアプリとして開いています。':installPrompt?'このボタンからChromeのインストール画面を開けます。':'Chromeでこのページを開いて、少し待ってから押してください。');
+}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;installConfirmed=false;installUI();});
+window.addEventListener('appinstalled',()=>{installPrompt=null;installBusy=false;installConfirmed=true;installUI('Chromeがインストールを受け付けました。ホーム画面への反映をお待ちください。');});
+$('installApp').onclick=async()=>{
+ if(installBusy||installConfirmed||standalone())return;
+ if(!installPrompt){installUI('Chromeからインストールの許可がまだ届いていません。このページを30秒ほど開いてから、もう一度押してください。「インストール済み」なのに開けない場合、このボタンでは解除できません。家計簿のデータは削除せず、この表示を伝えてください。');return;}
+ const event=installPrompt;installPrompt=null;installBusy=true;installUI();
+ try{
+  await event.prompt();const choice=await event.userChoice;
+  if(installConfirmed)return;
+  installUI(choice.outcome==='accepted'?'Chromeでインストールが承認されました。ホーム画面への反映をお待ちください。':'インストールをキャンセルしました。再び準備ができると、このボタンから試せます。');
+ }catch{installUI('インストール画面を開けませんでした。ページを読み直して、もう一度お試しください。記録はそのままです。');}
+ finally{installBusy=false;$('installApp').disabled=installConfirmed||standalone();$('installApp').textContent=installConfirmed?'インストールを受け付けました':'インストール';}
+};
+installUI();
+function openBackup(){installUI();$('backupError').textContent='';$('backup').showModal();}$('settings').onclick=openBackup;$('backupLink').onclick=openBackup;$('closeBackup').onclick=()=>$('backup').close();
 $('export').onclick=()=>{if(storageFailed){$('backupError').textContent='保存データを読み込めないため、書き出しを停止しています。';return;}const blob=new Blob([JSON.stringify({format:'kohaku-ledger',version:1,exportedAt:new Date().toISOString(),entries:rows},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=el('a');a.href=url;a.download=`kohaku-kakeibo-${localDate()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);toast('バックアップを書き出しました');};
 $('import').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>30*1024*1024)throw Error('ファイルが大きすぎます。');const data=JSON.parse(await file.text());if(data.format!=='kohaku-ledger'||data.version!==1)throw Error('この家計簿のバックアップではありません。');const next=validate(data.entries);if(!confirm(`${next.length}件を読み込み、現在の${rows.length}件を置き換えます。よろしいですか？`))return;localStorage.setItem(KEY,JSON.stringify(next));storageFailed=false;rows=next;render();$('backup').close();toast('バックアップを復元しました');}catch(err){$('backupError').textContent='読み込めませんでした。'+err.message;}finally{e.target.value='';}};
 window.addEventListener('storage',e=>{if(e.key===KEY){try{rows=e.newValue?validate(JSON.parse(e.newValue)):[];storageFailed=false;render();}catch{storageFailed=true;render();}}});render();

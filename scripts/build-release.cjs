@@ -12,6 +12,6 @@ const assets=names.map(name=>{
 });
 fs.writeFileSync(path.join(root,'version.json'),JSON.stringify({
   version,
-  notes:['ホーム画面とブラウザのアイコンを、コインと葉っぱの瓶のイラストに変更しました。'],
+  notes:['設定にインストールボタンと状態表示を追加しました。'],
   assets
 },null,2)+'\n');
