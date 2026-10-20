@@ -1,25 +1,25 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "notes": [
-    "大分類を左、小分類を右に並べて選べるようになりました。",
-    "食費など小分類がないものは1回押すだけで確定します。",
-    "設定にバージョン表示と更新ページを追加しました。"
+    "日付・金額・分類の位置を固定し、下の入力パネルだけ切り替えるようにしました。",
+    "専用テンキーと月送りカレンダーを追加しました。",
+    "記録やバックアップはそのまま使えます。"
   ],
   "assets": [
     {
-      "path": "releases/0.2.0/app.js",
-      "sha256": "d1b581a214429ef47fef6c3cd5add42edfd49b81ce2e11191e1ee0b2a173f216"
+      "path": "releases/0.3.0/app.js",
+      "sha256": "ec371ff4be51de30cfb300a9c86c154cb09b4ce75632fee689d9d448bde17ab1"
     },
     {
-      "path": "releases/0.2.0/core.js",
+      "path": "releases/0.3.0/core.js",
       "sha256": "89ed2231b604d9527d45e13ecb84c0b1ef834e6eeecf5e9dd2bfe2ea60ada934"
     },
     {
-      "path": "releases/0.2.0/style.css",
-      "sha256": "3ab32e4189517f3301a0601695a7b1997feadd2a0a672338c2ba0293f4b5c579"
+      "path": "releases/0.3.0/style.css",
+      "sha256": "2dfb0733bfbe465b89904782cbbf1378325a6df37dd5964fb33b9758a43d0abf"
     },
     {
-      "path": "releases/0.2.0/update.js",
+      "path": "releases/0.3.0/update.js",
       "sha256": "c5f998e14a37db59dc9c2130c05480e71c4154c0a3fbf0a9f4096b5b84e595e7"
     }
   ]

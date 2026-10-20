@@ -23,7 +23,7 @@ test('更新準備は正しいファイルを検証して同じURL領域へ戻�
   const $=await fixture('ok');await $('prepareUpdate').onclick();
   assert.equal($('openUpdated').hidden,false);
   const url=new URL($('openUpdated').href);
-  assert.equal(url.pathname,'/kohaku-kakeibo/');assert.equal(url.searchParams.get('release'),'0.2.0');
+  assert.equal(url.pathname,'/kohaku-kakeibo/');assert.equal(url.searchParams.get('release'),require('../package.json').version);
 });
 test('オフライン・壊れたファイル・公開途中では成功表示せず再試行できる',async()=>{
   for(const mode of ['offline','corrupt','mismatch']){

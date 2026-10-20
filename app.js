@@ -20,7 +20,7 @@ function categoryLabel(){
   $('chosenCategory').textContent=c.icon+' '+c.name+(sub?' ／ '+sub:'');
 }
 function commitCategory(category,child=''){
-  selected=category;sub=child;categoryLabel();$('categoryPicker').close();
+  selected=category;sub=child;categoryLabel();setPanel('idle');
   $('chooseCategory').focus();
 }
 function renderCategories(){
@@ -47,26 +47,68 @@ function renderCategories(){
   }
   $('pickerHelp').textContent=c.children.length?c.name+'の小分類を右側から選んでください':'大分類を押すと確定します';
 }
-$('chooseCategory').onclick=()=>{
-  document.activeElement?.blur();browsingCategory=selected;renderCategories();
-  $('categoryPicker').showModal();
-};
-$('closeCategory').onclick=()=>$('categoryPicker').close();
-$('categoryPicker').addEventListener('click',e=>{
-  if(e.target===$('categoryPicker')){
-    const r=e.target.getBoundingClientRect();
-    if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();
-  }
+let activePanel='amount',calendarYear,calendarMonth;
+function refreshFields(){
+  $('chosenAmount').textContent=$('amount').value?yen(Number($('amount').value)):'¥ 0';
+  const d=new Date($('date').value+'T12:00:00');
+  $('chosenDate').textContent=`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}（${'日月火水木金土'[d.getDay()]}）`;
+}
+function setPanel(name){
+  document.activeElement?.blur();activePanel=name;
+  for(const key of ['amount','date','category','idle'])$(key+'Panel').hidden=key!==name;
+  for(const [key,id] of [['amount','chooseAmount'],['date','chooseDate'],['category','chooseCategory']])$(id).setAttribute('aria-expanded',key===name);
+  $('panelTitle').textContent=({amount:'金額',date:'日付',category:'分類',idle:'入力'})[name];
+  $('closePanel').hidden=name==='idle';
+  if(name==='category'){browsingCategory=selected;renderCategories();}
+  if(name==='date'){const d=new Date($('date').value+'T12:00:00');calendarYear=d.getFullYear();calendarMonth=d.getMonth();renderCalendar();}
+  refreshFields();
+}
+$('chooseCategory').onclick=()=>setPanel('category');
+$('chooseAmount').onclick=()=>setPanel('amount');
+$('chooseDate').onclick=()=>setPanel('date');
+$('closePanel').onclick=()=>setPanel('idle');
+$('memo').addEventListener('focus',()=>{if(activePanel!=='idle'){setPanel('idle');$('memo').focus();}});
+function amountKey(key){
+  let value=$('amount').value;
+  if(key==='完了'){setPanel('idle');$('chooseAmount').focus();return;}
+  if(key==='⌫')value=value.slice(0,-1);
+  else if(key==='クリア')value='';
+  else if(/^\d{1,2}$/.test(key)){const next=(value+key).replace(/^0+(?=\d)/,'');if(next.length>9)return;value=next;}
+  else return;
+  $('amount').value=value;refreshFields();$('formError').textContent='';
+}
+for(const key of ['7','8','9','⌫','4','5','6','クリア','1','2','3','完了','0','00']){
+  const b=el('button',key);b.type='button';if(key==='⌫')b.setAttribute('aria-label','1桁消す');if(key==='完了')b.className='key-done';if(key==='0')b.className='key-zero';b.onclick=()=>amountKey(key);$('keypad').append(b);
+}
+$('editor').addEventListener('keydown',e=>{
+  if(activePanel!=='amount'||e.target===$('memo')||e.ctrlKey||e.metaKey||e.altKey)return;
+  if(/^\d$/.test(e.key)||e.key==='Backspace'||e.key==='Delete'){e.preventDefault();amountKey(e.key==='Backspace'?'⌫':e.key==='Delete'?'クリア':e.key);}
 });
+function selectDate(value){$('date').value=value;setPanel('idle');$('chooseDate').focus();}
+function renderCalendar(){
+  $('calendarMonth').textContent=`${calendarYear}年 ${calendarMonth+1}月`;
+  $('calendarPrev').disabled=calendarYear===1900&&calendarMonth===0;
+  $('calendarNext').disabled=calendarYear===9999&&calendarMonth===11;
+  const first=new Date(calendarYear,calendarMonth,1).getDay(),count=new Date(calendarYear,calendarMonth+1,0).getDate();
+  $('calendarDays').replaceChildren();
+  for(let i=0;i<42;i++){
+    const day=i-first+1;
+    if(day<1||day>count){$('calendarDays').append(el('span'));continue;}
+    const value=`${calendarYear}-${String(calendarMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const b=el('button',String(day),value===$('date').value?'selected':'');b.type='button';b.setAttribute('aria-label',value);b.setAttribute('aria-pressed',value===$('date').value);b.onclick=()=>selectDate(value);$('calendarDays').append(b);
+  }
+}
+function moveCalendar(n){const d=new Date(calendarYear,calendarMonth+n,1);if(d.getFullYear()<1900||d.getFullYear()>9999)return;calendarYear=d.getFullYear();calendarMonth=d.getMonth();renderCalendar();}
+$('calendarPrev').onclick=()=>moveCalendar(-1);$('calendarNext').onclick=()=>moveCalendar(1);$('calendarToday').onclick=()=>selectDate(localDate());
 function formSnapshot(){return JSON.stringify([$('amount').value,$('date').value,$('memo').value,selected,sub]);}
 let savedForm='';
 window.addEventListener('beforeunload',e=>{
   if($('editor').open&&formSnapshot()!==savedForm){e.preventDefault();e.returnValue='';}
 });
 
-function openEditor(r){editing=r?.id||null;selected=r?.category||'食費';sub=r?.subcategory||'';$('editorTitle').textContent=r?'記録を編集':'支出を記録';$('amount').value=r?.amount||'';$('date').value=r?.date||localDate();$('memo').value=r?.memo||'';$('formError').textContent='';$('delete').hidden=!r;$('continue').hidden=!!r;categoryLabel();savedForm=formSnapshot();$('editor').showModal();$('amount').focus();}
+function openEditor(r){editing=r?.id||null;selected=r?.category||'食費';sub=r?.subcategory||'';$('editorTitle').textContent=r?'記録を編集':'支出を記録';$('amount').value=r?.amount||'';$('date').value=r?.date||localDate();$('memo').value=r?.memo||'';$('formError').textContent='';$('delete').hidden=!r;$('continue').hidden=!!r;categoryLabel();savedForm=formSnapshot();$('editor').showModal();setPanel('amount');$('chooseAmount').focus();}
 $('add').onclick=()=>openEditor();$('closeEditor').onclick=()=>$('editor').close();
-$('entryForm').onsubmit=e=>{e.preventDefault();const amount=Number($('amount').value.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace(/[,，]/g,''));if(!Number.isSafeInteger(amount)||amount<=0||amount>999999999){$('formError').textContent='金額は1〜999,999,999円の整数で入力してください。';return;}if(categories.find(c=>c.name===selected).children.length&&!sub){$('formError').textContent='分類の内訳を選んでください。';return;}const r={id:editing||crypto.randomUUID(),date:$('date').value,amount,category:selected,subcategory:sub,memo:$('memo').value.trim()};try{validate([r]);persist(editing?rows.map(x=>x.id===editing?r:x):[...rows,r]);}catch(err){$('formError').textContent='保存できませんでした。'+err.message;return;}month=r.date.slice(0,7);render();toast('記録しました');if(e.submitter?.id==='continue'){$('amount').value='';$('memo').value='';$('formError').textContent='';$('amount').focus();savedForm=formSnapshot();}else $('editor').close();};
+$('entryForm').onsubmit=e=>{e.preventDefault();const amount=Number($('amount').value.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace(/[,，]/g,''));if(!Number.isSafeInteger(amount)||amount<=0||amount>999999999){$('formError').textContent='金額は1〜999,999,999円の整数で入力してください。';return;}if(categories.find(c=>c.name===selected).children.length&&!sub){$('formError').textContent='分類の内訳を選んでください。';return;}const r={id:editing||crypto.randomUUID(),date:$('date').value,amount,category:selected,subcategory:sub,memo:$('memo').value.trim()};try{validate([r]);persist(editing?rows.map(x=>x.id===editing?r:x):[...rows,r]);}catch(err){$('formError').textContent='保存できませんでした。'+err.message;return;}month=r.date.slice(0,7);render();toast('記録しました');if(e.submitter?.id==='continue'){$('amount').value='';$('memo').value='';$('formError').textContent='';setPanel('amount');$('chooseAmount').focus();savedForm=formSnapshot();}else $('editor').close();};
 $('delete').onclick=()=>{if(!confirm('この記録を削除しますか？'))return;try{persist(rows.filter(r=>r.id!==editing));$('editor').close();render();toast('削除しました');}catch(e){$('formError').textContent='削除できませんでした。'+e.message;}};
 function openBackup(){$('backupError').textContent='';$('backup').showModal();}$('settings').onclick=openBackup;$('backupLink').onclick=openBackup;$('closeBackup').onclick=()=>$('backup').close();
 $('export').onclick=()=>{if(storageFailed){$('backupError').textContent='保存データを読み込めないため、書き出しを停止しています。';return;}const blob=new Blob([JSON.stringify({format:'kohaku-ledger',version:1,exportedAt:new Date().toISOString(),entries:rows},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=el('a');a.href=url;a.download=`kohaku-kakeibo-${localDate()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);toast('バックアップを書き出しました');};

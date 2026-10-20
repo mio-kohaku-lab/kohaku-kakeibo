@@ -12,6 +12,6 @@ const assets=names.map(name=>{
 });
 fs.writeFileSync(path.join(root,'version.json'),JSON.stringify({
   version,
-  notes:['大分類を左、小分類を右に並べて選べるようになりました。','食費など小分類がないものは1回押すだけで確定します。','設定にバージョン表示と更新ページを追加しました。'],
+  notes:['日付・金額・分類の位置を固定し、下の入力パネルだけ切り替えるようにしました。','専用テンキーと月送りカレンダーを追加しました。','記録やバックアップはそのまま使えます。'],
   assets
 },null,2)+'\n');
