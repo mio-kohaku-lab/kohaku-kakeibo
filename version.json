@@ -1,25 +1,23 @@
 {
-  "version": "0.3.10",
+  "version": "0.3.11",
   "notes": [
-    "前年比の6分類を横スクロールなしで表示するようにしました。",
-    "棒を分類色にし、前年を50％の濃さにしました。",
-    "項目別合計の行間を縮め、記録ボタンとの重なりを解消しました。"
+    "ホーム画面とブラウザのアイコンを、コインと葉っぱの瓶のイラストに変更しました。"
   ],
   "assets": [
     {
-      "path": "releases/0.3.10/app.js",
+      "path": "releases/0.3.11/app.js",
       "sha256": "671058fdbebfe6349e57e173832a028a7c4bf85733546396f4413751ed0cb292"
     },
     {
-      "path": "releases/0.3.10/core.js",
+      "path": "releases/0.3.11/core.js",
       "sha256": "2191768626670d1f325ee5cd9f0d53ea76022b6494d7da1ab078a7e2378db3a5"
     },
     {
-      "path": "releases/0.3.10/style.css",
+      "path": "releases/0.3.11/style.css",
       "sha256": "2cdd2c6a53867810e6a28a76ffd5ee06ddab7c56b72383a77ac2dddc16ba4c74"
     },
     {
-      "path": "releases/0.3.10/update.js",
+      "path": "releases/0.3.11/update.js",
       "sha256": "1d0dc77602ebcff63f7af96dd45be0ae61642e061973ca4b0a38c6a6d0a7d226"
     }
   ]

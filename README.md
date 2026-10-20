@@ -38,6 +38,6 @@ Chromeで家計簿を開き、メニューのホーム画面への追加を選�
 - 更新ファイルはSHA-256で確認します。オフライン起動は引き続き未対応です。
 
 依存パッケージ不要。`python -m http.server 8765 --bind 127.0.0.1` で起動し、`http://127.0.0.1:8765/` を開きます。
-検証は `npm test`。PNGアイコンの再生成はWindowsで `pwsh -File scripts/generate-icons.ps1`。
+検証は `npm test`。PNGアイコンの再生成はWindowsで `pwsh -File scripts/generate-icons.ps1 -Source <承認済みアイコン画像のパス>`。
 
 変更履歴は [CHANGELOG.md](CHANGELOG.md) に記録します。
