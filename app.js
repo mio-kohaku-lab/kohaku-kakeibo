@@ -32,28 +32,30 @@ else{if(statsView==='chart'){target.append(spendingChart(data));return;}for(cons
 function yearChart(data){
  const wrap=el('section',undefined,'year-chart');
  const legend=el('div',undefined,'year-legend');
- legend.append(el('span',`${data.month.replace('-','年')}月`,'year-current'),el('span',`${data.previousMonth.replace('-','年')}月`,'year-previous'));wrap.append(legend);
- wrap.append(el('p','左から選択月の金額順。同じ分類の右側が前年同月です。','year-note'));
- if(!data.hasCurrent||!data.hasPrevious)wrap.append(el('p',(!data.hasCurrent?'選択月':'')+(!data.hasCurrent&&!data.hasPrevious?'・':'')+(!data.hasPrevious?'前年同月':'')+'の記録はありません（データなし）。','year-note'));
+ legend.append(el('span',`左・濃：${data.month.replace('-','年')}月`,'year-current'),el('span',`右・薄：${data.previousMonth.replace('-','年')}月`,'year-previous'));wrap.append(legend);
+ if(!data.hasCurrent||!data.hasPrevious)wrap.append(el('p',(!data.hasCurrent?'選択月':'')+(!data.hasCurrent&&!data.hasPrevious?'・':'')+(!data.hasPrevious?'前年同月':'')+'の記録はありません（—）。','year-note'));
  if(!data.hasCurrent&&!data.hasPrevious)return wrap;
  const svg=(tag,attrs,text)=>{const n=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n;};
  const max=Math.max(1,...data.groups.flatMap(g=>[g.current||0,g.previous||0]));
- const unit=10**Math.floor(Math.log10(max));const limit=Math.ceil(max/unit)*unit;
- const slot=Math.max(48,max.toLocaleString('ja-JP').length*6+8),groupWidth=slot*2+24,width=56+groupWidth*data.groups.length;
- const chart=svg('svg',{viewBox:`0 0 ${width} 320`,width,height:320,role:'img','aria-label':'大分類ごとの選択月と前年同月の支出比較。選択月の金額が高い順、各組の左が選択月、右が前年同月。'});
- for(let i=0;i<=4;i++){const y=260-i*54;chart.append(svg('line',{x1:50,x2:width-8,y1:y,y2:y,stroke:'#e1e4d8'}));chart.append(svg('text',{x:44,y:y+4,'text-anchor':'end',class:'bar-axis'},limit*i/4>=100000000?(limit*i/4/100000000).toLocaleString('ja-JP',{maximumFractionDigits:1})+'億':limit*i/4>=10000?(limit*i/4/10000).toLocaleString('ja-JP',{maximumFractionDigits:1})+'万':(limit*i/4).toLocaleString('ja-JP',{maximumFractionDigits:0})));}
- chart.append(svg('text',{x:44,y:24,'text-anchor':'end',class:'bar-axis'},'円'));
+ const unit=10**Math.floor(Math.log10(max)),limit=Math.ceil(max/unit)*unit;
+ const groupWidth=59,width=400;
+ const chart=svg('svg',{viewBox:'0 0 400 258',role:'img','aria-label':'6分類の前年比。金額は各分類の上段が選択月、下段が前年同月。棒は左が選択月、右が前年同月。'});
+ const axis=n=>n>=100000000?(n/100000000).toLocaleString('ja-JP',{maximumFractionDigits:1})+'億':n>=10000?(n/10000).toLocaleString('ja-JP',{maximumFractionDigits:1})+'万':n.toLocaleString('ja-JP',{maximumFractionDigits:0});
+ for(let i=0;i<=4;i++){const y=214-i*38;chart.append(svg('line',{x1:40,x2:396,y1:y,y2:y,stroke:'#e1e4d8'}));chart.append(svg('text',{x:35,y:y+3,'text-anchor':'end',class:'bar-axis'},axis(limit*i/4)));}
+ chart.append(svg('text',{x:35,y:49,'text-anchor':'end',class:'bar-axis'},'円'));
  data.groups.forEach((g,i)=>{
-  const left=56+i*groupWidth;
+  const center=40+(i+0.5)*groupWidth;
   for(const [j,value] of [g.current,g.previous].entries()){
-   const center=left+12+slot*(j+0.5),h=value===null?0:value/limit*216;
-   const bar=svg('rect',{x:center-15,y:260-h,width:30,height:h,rx:3,fill:j?'#c9b48e':'#6d7d52',class:j?'previous-bar':'current-bar'});
+   const h=value===null?0:value/limit*152;
+   const bar=svg('rect',{x:center+(j?3:-15),y:214-h,width:12,height:h,rx:2,fill:g.color,'fill-opacity':j?0.5:1,class:j?'previous-bar':'current-bar'});
    bar.append(svg('title',{},`${g.name} ${j?data.previousMonth:data.month} ${value===null?'データなし':yen(value)}`));chart.append(bar);
-   chart.append(svg('text',{x:center,y:Math.max(32,252-h),'text-anchor':'middle',class:'bar-value'},value===null?'—':value.toLocaleString('ja-JP')));
+   const text=value===null?'—':value.toLocaleString('ja-JP');
+   chart.append(svg('text',{x:center,y:j?34:19,'text-anchor':'middle',class:'bar-value',style:`font-size:${Math.min(10,52/(text.length*0.6))}px;fill:${j?'#777f6e':'#373b33'}`},text));
   }
-  chart.append(svg('text',{x:left+12+slot,y:287,'text-anchor':'middle',class:'bar-category'},g.name));
+  const lines=g.name==='定期購入品'?['定期','購入品']:[g.name];
+  lines.forEach((line,j)=>chart.append(svg('text',{x:center,y:233+j*14,'text-anchor':'middle',class:'bar-category'},line)));
  });
- const scroll=el('div',undefined,'bar-scroll');scroll.setAttribute('tabindex','0');scroll.setAttribute('aria-label','棒グラフ。横にスクロールして全分類を確認できます。');scroll.append(chart);wrap.append(scroll,el('p','横にスクロールすると、すべての分類を見られます。','year-note'));
+ const frame=el('div',undefined,'bar-frame');frame.append(chart);wrap.append(frame);
  return wrap;
 }
 function spendingChart(data){

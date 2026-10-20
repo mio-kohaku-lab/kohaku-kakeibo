@@ -12,6 +12,6 @@ const assets=names.map(name=>{
 });
 fs.writeFileSync(path.join(root,'version.json'),JSON.stringify({
   version,
-  notes:['前年比タブに大分類別の棒グラフを追加しました。','選択月の金額順に、前年同月の棒を右隣へ並べています。'],
+  notes:['前年比の6分類を横スクロールなしで表示するようにしました。','棒を分類色にし、前年を50％の濃さにしました。','項目別合計の行間を縮め、記録ボタンとの重なりを解消しました。'],
   assets
 },null,2)+'\n');
