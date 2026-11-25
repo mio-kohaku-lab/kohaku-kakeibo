@@ -12,3 +12,27 @@ test('前年比は選択月の金額順で前年同月の同分類を対応さ�
  const priorOnly=yearComparison([row],'2027-10');assert.equal(priorOnly.hasCurrent,false);assert.equal(priorOnly.groups[0].previous,633);
  assert.equal(yearComparison([],'2026-01').previousMonth,'2025-01');
 });
+const {sortEntries}=require('../core.js');
+test('金額は数値順、項目別は小分類ごとに日付／金額の昇降順で並ぶ',()=>{
+ const source=[
+ {...row,id:'f1',date:'2026-11-01',amount:20},
+ {...row,id:'g1',category:'光熱費',subcategory:'ガス代',date:'2026-11-02',amount:2},
+ {...row,id:'e1',category:'光熱費',subcategory:'電気代',date:'2026-11-03',amount:100},
+ {...row,id:'f2',date:'2026-11-04',amount:3},
+ {...row,id:'e2',category:'光熱費',subcategory:'電気代',date:'2026-11-01',amount:900},
+ ];
+ const original=JSON.stringify(source),ids=(mode,dir)=>sortEntries(source,mode,dir).map(r=>r.id);
+ assert.deepEqual(ids('amount','asc'),['g1','f2','f1','e1','e2']);assert.deepEqual(ids('amount','desc'),['e2','e1','f1','f2','g1']);
+ assert.deepEqual(ids('date','asc'),['f1','e2','g1','e1','f2']);assert.deepEqual(ids('date','desc'),['f2','e1','g1','f1','e2']);
+ assert.deepEqual(ids('category-date','asc'),['f1','f2','e2','e1','g1']);assert.deepEqual(ids('category-date','desc'),['f2','f1','e1','e2','g1']);
+ assert.deepEqual(ids('category-amount','asc'),['f2','f1','e1','e2','g1']);assert.deepEqual(ids('category-amount','desc'),['f1','f2','e2','e1','g1']);
+ assert.equal(JSON.stringify(source),original);
+ const totals=monthly(source,'2026-11');assert.equal(monthly(sortEntries(source,'amount','asc'),'2026-11').total,totals.total);
+ assert.deepEqual(sortEntries([], 'category-amount','desc'),[]);
+});
+test('同額は新しい日付優先、同日同額は元の順序を保ち、過去の内訳なしも並べられる',()=>{
+ const source=[{...row,id:'older',date:'2026-11-01'}, {...row,id:'newer',date:'2026-11-02'}, {...row,id:'tie',date:'2026-11-02'}];
+ for(const direction of ['asc','desc'])assert.deepEqual(sortEntries(source,'amount',direction).map(r=>r.id),['newer','tie','older']);
+ const grouped=[{...row,id:'child',category:'その他',subcategory:'病院'},{...row,id:'legacy',category:'その他',subcategory:''}];
+ assert.deepEqual(sortEntries(grouped,'category-amount','desc').map(r=>r.id),['legacy','child']);
+});

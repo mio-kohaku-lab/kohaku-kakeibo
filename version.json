@@ -1,23 +1,24 @@
 {
-  "version": "0.3.17",
+  "version": "0.3.18",
   "notes": [
-    "実機表示に合わせ、Android用アイコンを86%に調整しました。"
+    "記録一覧に日付・金額・項目別の並べ替えを追加しました。",
+    "昇順と降順を切り替えられます。"
   ],
   "assets": [
     {
-      "path": "releases/0.3.17/app.js",
-      "sha256": "66342eea42b958732adcfc0fdae9331c2ed81643673d634b6c9cfacc60665045"
+      "path": "releases/0.3.18/app.js",
+      "sha256": "18730a9e65bbbe02bf7e32a733c598bacf681099423756c879b2e0d69528ae02"
     },
     {
-      "path": "releases/0.3.17/core.js",
-      "sha256": "2191768626670d1f325ee5cd9f0d53ea76022b6494d7da1ab078a7e2378db3a5"
+      "path": "releases/0.3.18/core.js",
+      "sha256": "7950891ceb2002bd52a2d2612bae28299e633b6ba93d0330b89615a8937dd2b4"
     },
     {
-      "path": "releases/0.3.17/style.css",
-      "sha256": "dc759be87ad7765acba9fc568f98cb11e4ff55058fc17e7196cb99b88d8d6a4a"
+      "path": "releases/0.3.18/style.css",
+      "sha256": "7bf9456039ef7b861bc312ff63ba1744d37a36b9c2ac3e6244b8deb75e61e72c"
     },
     {
-      "path": "releases/0.3.17/update.js",
+      "path": "releases/0.3.18/update.js",
       "sha256": "1d0dc77602ebcff63f7af96dd45be0ae61642e061973ca4b0a38c6a6d0a7d226"
     }
   ]

@@ -161,3 +161,15 @@ test('インストールの承認・受付・失敗を表示し、記録は変�
  f.handlers.appinstalled();assert.equal($('installApp').disabled,true);assert.match($('installStatus').textContent,/受け付け/);
  const bad=fixture();bad.handlers.beforeinstallprompt({preventDefault(){},prompt:async()=>{throw Error('unavailable');}});await bad.$('installApp').onclick();assert.equal(bad.$('installApp').disabled,false);assert.match(bad.$('installStatus').textContent,/開けませんでした/);
 });
+test('一覧の並べ替えは編集対象と保存データを保ち、月移動・再読み込みでも保持する',()=>{
+ const session=new Map(),f=fixture(session),$=f.$;const before=f.storage.get('kohaku-ledger-v1');
+ vm.runInContext("rows=[{...rows[0],id:'a',category:'食費',subcategory:'',amount:20},{...rows[0],id:'b',category:'光熱費',subcategory:'ガス代',amount:2},{...rows[0],id:'c',category:'食費',subcategory:'',amount:3}];month='2026-10';render()",f.context);
+ $('sortMode').value='amount';$('sortMode').onchange();assert.equal($('content').children[0].children[3].textContent,'¥ 20');
+ $('sortDirection').onclick();assert.equal($('sortDirection').textContent,'↑ 低い順');assert.equal($('content').children[0].children[3].textContent,'¥ 2');
+ $('content').children[0].onclick();assert.equal($('chosenCategory').textContent,'💡 光熱費 ／ ガス代');assert.equal($('amount').value,'2');
+ $('sortMode').value='category-amount';$('sortMode').onchange();assert.equal($('content').children[0].children[3].textContent,'¥ 3');
+ $('prev').onclick();assert.equal($('sortMode').value,'category-amount');assert.equal($('content').children[0].className,'empty');$('next').onclick();
+ $('statsTab').onclick();assert.equal($('listSort').hidden,true);$('listTab').onclick();assert.equal($('listSort').hidden,false);
+ const restored=fixture(session);assert.equal(restored.$('sortMode').value,'category-amount');assert.equal(restored.$('sortDirection').textContent,'↑ 低い順');
+ assert.equal(f.storage.get('kohaku-ledger-v1'),before);
+});

@@ -1,25 +1,32 @@
-const $=id=>document.getElementById(id), KEY='kohaku-ledger-v1', {categories,validate,monthly,yearComparison}=Ledger;
+const $=id=>document.getElementById(id), KEY='kohaku-ledger-v1', {categories,validate,monthly,yearComparison,sortEntries}=Ledger;
 const yen=n=>'¥ '+n.toLocaleString('ja-JP');
 const localDate=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
-let month=localDate().slice(0,7),view='list',statsView='totals',rows=[],editing=null,selected='食費',sub='',storageFailed=false;
+let month=localDate().slice(0,7),view='list',statsView='totals',sortMode='date',sortDirection='desc',rows=[],editing=null,selected='食費',sub='',storageFailed=false;
 const VIEW_KEY='kohaku-ledger-view-v1';
 try{
   const saved=JSON.parse(sessionStorage.getItem(VIEW_KEY)||'null');
   if(saved&&/^(19\d{2}|[2-9]\d{3})-(0[1-9]|1[0-2])$/.test(saved.month))month=saved.month;
   if(saved&&['list','stats'].includes(saved.view))view=saved.view;
   if(saved&&['totals','chart','year'].includes(saved.statsView))statsView=saved.statsView;
+  if(saved&&['date','amount','category-date','category-amount'].includes(saved.sortMode))sortMode=saved.sortMode;
+  if(saved&&['asc','desc'].includes(saved.sortDirection))sortDirection=saved.sortDirection;
 }catch{/* Viewing preferences must never prevent access to ledger records. */}
-function rememberView(){try{sessionStorage.setItem(VIEW_KEY,JSON.stringify({month,view,statsView}));}catch{}}
+function rememberView(){try{sessionStorage.setItem(VIEW_KEY,JSON.stringify({month,view,statsView,sortMode,sortDirection}));}catch{}}
 try{const raw=localStorage.getItem(KEY);rows=raw?validate(JSON.parse(raw)):[];}catch(e){storageFailed=true;}
 function el(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
 function toast(text){$('toast').textContent=text;$('toast').classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('toast').classList.remove('visible'),2600);}
 function persist(next){if(storageFailed)throw Error('保存データを読み込めませんでした。上書きを防ぐため保存を止めています。バックアップから復元してください。');localStorage.setItem(KEY,JSON.stringify(next));rows=next;}
-function render(){rememberView();const data=monthly(rows,month);$('monthTitle').textContent=`${month.slice(0,4)}年 ${Number(month.slice(5))}月`;$('total').textContent=yen(data.total);$('count').textContent=`${data.entries.length}件`;$('listTab').setAttribute('aria-selected',view==='list');$('statsTab').setAttribute('aria-selected',view==='stats');$('statsSwitch').hidden=view!=='stats';$('totalsTab').setAttribute('aria-pressed',statsView==='totals');$('chartTab').setAttribute('aria-pressed',statsView==='chart');$('yearTab').setAttribute('aria-pressed',statsView==='year');const target=$('content');target.replaceChildren();
+function render(){rememberView();
+$('listSort').hidden=view!=='list';$('sortMode').value=sortMode;
+const amountOrder=sortMode.endsWith('amount');
+$('sortDirection').textContent=sortDirection==='desc'?(amountOrder?'↓ 高い順':'↓ 新しい順'):(amountOrder?'↑ 低い順':'↑ 古い順');
+$('sortDirection').setAttribute('aria-label',`現在は${sortDirection==='asc'?'昇順':'降順'}。押すと${sortDirection==='asc'?'降順':'昇順'}に切り替えます`);
+const data=monthly(rows,month);$('monthTitle').textContent=`${month.slice(0,4)}年 ${Number(month.slice(5))}月`;$('total').textContent=yen(data.total);$('count').textContent=`${data.entries.length}件`;$('listTab').setAttribute('aria-selected',view==='list');$('statsTab').setAttribute('aria-selected',view==='stats');$('statsSwitch').hidden=view!=='stats';$('totalsTab').setAttribute('aria-pressed',statsView==='totals');$('chartTab').setAttribute('aria-pressed',statsView==='chart');$('yearTab').setAttribute('aria-pressed',statsView==='year');const target=$('content');target.replaceChildren();
 if(storageFailed)target.append(el('p','保存データを読み込めません。バックアップから復元してください。','error'));
 if(view==='stats'&&statsView==='year'){target.append(yearChart(yearComparison(rows,month)));return;}
 if(!data.entries.length){const empty=el('div',undefined,'empty');empty.append(el('div','✎','empty-icon'),el('h3','この月の記録はまだありません'),el('p','最初のひとつを、気軽に記録してみよう。'));target.append(empty);return;}
 if(view==='list'){
-  for(const r of data.entries){
+  for(const r of sortEntries(data.entries,sortMode,sortDirection)){
     const d=new Date(r.date+'T12:00:00'),weekday='日月火水木金土'[d.getDay()];
     const item=r.subcategory||r.category,b=el('button',undefined,'entry compact-entry');
     b.setAttribute('aria-label',`${r.date} ${weekday}曜日 ${r.category}${r.subcategory?' ／ '+r.subcategory:''} ${r.amount}円を編集`);
@@ -91,6 +98,9 @@ function spendingChart(data){
 }
 function shift(n){const d=new Date(Number(month.slice(0,4)),Number(month.slice(5))-1+n,1);month=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;render();}
 $('prev').onclick=()=>shift(-1);$('next').onclick=()=>shift(1);$('today').onclick=()=>{month=localDate().slice(0,7);render();};$('listTab').onclick=()=>{view='list';render();};$('statsTab').onclick=()=>{view='stats';render();};
+
+$('sortMode').onchange=()=>{sortMode=$('sortMode').value;render();};
+$('sortDirection').onclick=()=>{sortDirection=sortDirection==='asc'?'desc':'asc';render();};
 
 $('totalsTab').onclick=()=>{statsView='totals';render();};
 $('chartTab').onclick=()=>{statsView='chart';render();};

@@ -12,6 +12,6 @@ const assets=names.map(name=>{
 });
 fs.writeFileSync(path.join(root,'version.json'),JSON.stringify({
   version,
-  notes:['実機表示に合わせ、Android用アイコンを86%に調整しました。'],
+  notes:['記録一覧に日付・金額・項目別の並べ替えを追加しました。','昇順と降順を切り替えられます。'],
   assets
 },null,2)+'\n');
